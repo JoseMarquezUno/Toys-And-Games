@@ -17,12 +17,14 @@ namespace ToysAndGames.DataAccess
         }
         public DbSet<Product> Products { get; set; } = null!;
         public DbSet<Company> Companies { get; set; } = null!;
+        public DbSet<ProductImage> ProductImages { get; set; } = null!;
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             modelBuilder.Entity<Product>().Property(p => p.Price).HasColumnType("Money");
             modelBuilder.ApplyConfiguration(new CompaniesDataSeed());
             modelBuilder.ApplyConfiguration(new ProductsDataSeed());
+            modelBuilder.ApplyConfiguration(new ProductImagesDataSeed());
         }
     }
 }

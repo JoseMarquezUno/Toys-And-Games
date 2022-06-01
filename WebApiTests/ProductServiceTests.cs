@@ -21,7 +21,7 @@ namespace ToysAndGames.WebApiTests
             //Arrange
             var productsMock = new Mock<IProductService>();
             productsMock.Setup(p => p.GetProducts())
-                .Returns(new[]{new Product
+                .Returns(new[]{new ProductDTO
                 {
                     ProductId = 1,
                     Name = "Hot Wheels",
@@ -29,9 +29,9 @@ namespace ToysAndGames.WebApiTests
                     AgeRestriction = 3,
                     CompanyId = 1,
                     Price = 25,
-                    Company = new Company { CompanyId = 1, Name = "Mattel" }
+                    CompanyName = "Mattel" 
                 },
-                new Product
+                new ProductDTO
                 {
                     ProductId = 1,
                     Name = "Monopoly",
@@ -39,7 +39,7 @@ namespace ToysAndGames.WebApiTests
                     AgeRestriction = null,
                     CompanyId = 2,
                     Price = 250,
-                    Company = new Company { CompanyId = 2, Name = "Hasbro" }
+                    CompanyName = "Hasbro" 
                 }});
 
             //Act
@@ -58,7 +58,7 @@ namespace ToysAndGames.WebApiTests
             //Arrange
             var productsMock = new Mock<IProductService>();
             productsMock.Setup(p => p.GetProducts())
-                .Returns(new List<Product>());
+                .Returns(new List<ProductDTO>());
 
             //Act
             var result = productsMock.Object.GetProducts();
@@ -76,7 +76,7 @@ namespace ToysAndGames.WebApiTests
             //Arrange
             var productsMock = new Mock<IProductService>();
             productsMock.Setup(p => p.GetProductById(It.IsInRange<int>(1,4,Moq.Range.Inclusive)))
-                .Returns(new Product
+                .Returns(new ProductDTO
                 {
                     ProductId = id,
                     Name = "Hot Wheels",
@@ -84,7 +84,7 @@ namespace ToysAndGames.WebApiTests
                     AgeRestriction = 3,
                     CompanyId = 1,
                     Price = 25,
-                    Company = new Company { CompanyId = 1, Name = "Mattel" }
+                    CompanyName = "Mattel"
                 });
 
             //Act

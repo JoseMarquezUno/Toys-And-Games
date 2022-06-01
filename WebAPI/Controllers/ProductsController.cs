@@ -15,14 +15,14 @@ namespace WebAPI.Controllers
         {
             _productService = productService;
         }
-        [HttpGet("Products")]
-        public IList<Product> GetProducts()
+        [HttpGet]
+        public IList<ProductDTO> GetProducts()
         {
             return _productService.GetProducts();
         }
 
         [HttpGet("Product/{id}")]
-        public Product GetProduct(int id)
+        public ProductDTO GetProduct(int id)
         {
             return _productService.GetProductById(id);
         }

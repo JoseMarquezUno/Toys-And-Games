@@ -17,7 +17,9 @@ namespace ToysAndGames.Models.DTO
         [Range(0, 100)]
         public int? AgeRestriction { get; set; }
         public int CompanyId { get; set; }
+        public string CompanyName { get; set; }
         [Range(1.00, 1000.00)]
         public decimal Price { get; set; }
+        public IList<string> ProductImage { get; set; }
     }
 }

@@ -21,5 +21,6 @@ namespace ToysAndGames.Models
         public Company Company { get; set; }
         [Range(1.00,1000.00)]
         public decimal Price { get; set; }
+        public ICollection<ProductImage> ProductImages { get; set; }
     }
 }

@@ -7,9 +7,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\DataAccess\DataAccess.csproj" />
-    <ProjectReference Include="..\Models\ToysAndGames.Models.csproj" />
-    <ProjectReference Include="..\Utilities\Utilities.csproj" />
+    <Folder Include="Interfaces\" />
   </ItemGroup>
 
 </Project>

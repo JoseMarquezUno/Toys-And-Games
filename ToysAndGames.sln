@@ -5,13 +5,15 @@ VisualStudioVersion = 17.2.32516.85
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "WebAPI", "WebAPI\WebAPI.csproj", "{6E379B0D-4776-44B8-ADDF-C1DF91076F4C}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Models", "Models\Models.csproj", "{9AF5FC7C-9AA6-470C-9BC6-871B1ABF08EA}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ToysAndGames.Models", "Models\ToysAndGames.Models.csproj", "{9AF5FC7C-9AA6-470C-9BC6-871B1ABF08EA}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Services", "Services\Services.csproj", "{FB5E794C-81C0-4746-BEF7-5E9B6B079A80}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Services", "Services\Services.csproj", "{FB5E794C-81C0-4746-BEF7-5E9B6B079A80}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DataAccess", "DataAccess\DataAccess.csproj", "{AFBB5509-067F-46D7-B9D7-AAB545B15246}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DataAccess", "DataAccess\DataAccess.csproj", "{AFBB5509-067F-46D7-B9D7-AAB545B15246}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WebApiTests", "WebApiTests\WebApiTests.csproj", "{0048FFB8-D4E0-44AC-A406-FCD1E854EAAF}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "WebApiTests", "WebApiTests\WebApiTests.csproj", "{0048FFB8-D4E0-44AC-A406-FCD1E854EAAF}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Utilities", "Utilities\Utilities.csproj", "{075ABDA3-3115-4D66-B057-F7E46585A317}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -39,6 +41,10 @@ Global
 		{0048FFB8-D4E0-44AC-A406-FCD1E854EAAF}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{0048FFB8-D4E0-44AC-A406-FCD1E854EAAF}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{0048FFB8-D4E0-44AC-A406-FCD1E854EAAF}.Release|Any CPU.Build.0 = Release|Any CPU
+		{075ABDA3-3115-4D66-B057-F7E46585A317}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{075ABDA3-3115-4D66-B057-F7E46585A317}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{075ABDA3-3115-4D66-B057-F7E46585A317}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{075ABDA3-3115-4D66-B057-F7E46585A317}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

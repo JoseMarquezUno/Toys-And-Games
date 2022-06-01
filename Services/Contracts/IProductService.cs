@@ -10,8 +10,8 @@ namespace ToysAndGames.Services.Contracts
 {
     public interface IProductService
     {
-        IList<Product> GetProducts();
-        Product GetProductById(int id);
+        IList<ProductDTO> GetProducts();
+        ProductDTO GetProductById(int id);
         int AddProduct(ProductDTO productDTO);
         void UpdateProduct(int id, ProductDTO productDTO);
         void DeleteProduct(int id);

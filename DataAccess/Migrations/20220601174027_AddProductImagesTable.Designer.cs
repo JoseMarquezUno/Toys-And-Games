@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using ToysAndGames.DataAccess;
 
@@ -11,9 +12,10 @@ using ToysAndGames.DataAccess;
 namespace DataAccess.Migrations
 {
     [DbContext(typeof(ToysAndGamesContext))]
-    partial class ToysAndGamesContextModelSnapshot : ModelSnapshot
+    [Migration("20220601174027_AddProductImagesTable")]
+    partial class AddProductImagesTable
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -145,32 +147,6 @@ namespace DataAccess.Migrations
                     b.HasIndex("ProductId");
 
                     b.ToTable("ProductImages");
-
-                    b.HasData(
-                        new
-                        {
-                            ProductImageId = 1,
-                            ImagePath = "\\Images\\TwinMill.jpg",
-                            ProductId = 1
-                        },
-                        new
-                        {
-                            ProductImageId = 2,
-                            ImagePath = "\\Images\\Monopoly.jfif",
-                            ProductId = 2
-                        },
-                        new
-                        {
-                            ProductImageId = 3,
-                            ImagePath = "\\Images\\maquinaderaspados.jpg",
-                            ProductId = 3
-                        },
-                        new
-                        {
-                            ProductImageId = 4,
-                            ImagePath = "\\Images\\TwinMill2.jpg",
-                            ProductId = 4
-                        });
                 });
 
             modelBuilder.Entity("ToysAndGames.Models.Product", b =>

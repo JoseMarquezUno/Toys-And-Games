@@ -23,7 +23,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <None Update="Images\maquina-de-raspados-mi-alegria.jpg">
+    <None Update="Images\maquinaderaspados.jpg">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
     <None Update="Images\Monopoly.jfif">

@@ -8,6 +8,8 @@ using ToysAndGames.Models;
 using ToysAndGames.Services.Contracts;
 using Microsoft.EntityFrameworkCore;
 using ToysAndGames.Models.DTO;
+using System.Reflection;
+using Utilities;
 
 namespace ToysAndGames.Services.Services
 {
@@ -36,33 +38,63 @@ namespace ToysAndGames.Services.Services
 
         public void DeleteProduct(int id)
         {
-            _context.Products.Remove(_context.Products.FirstOrDefault(p => p.ProductId == id));
-            _context.SaveChanges();
+            Product product = _context.Products.FirstOrDefault(p => p.ProductId == id);
+            if (product != null)
+            {
+                _context.Products.Remove(product);
+                _context.SaveChanges();
+            }
         }
 
-        public Product GetProductById(int id)
+        public ProductDTO GetProductById(int id)
         {
-            return _context.Products.Include(c => c.Company).FirstOrDefault(p => p.ProductId == id);
+            string path = Path.GetDirectoryName(Assembly.GetCallingAssembly().Location);
+            Product product = _context.Products.Include(c => c.Company).Include(p => p.ProductImages).FirstOrDefault(p => p.ProductId == id);
+            List<string> relPaths = ImageUtilities.GetImagePathsFromAssembly(path, product.ProductImages.Select(p => p.ImagePath).ToList());
+            ProductDTO productDTO = new()
+            {
+                ProductId = product.ProductId,
+                Name = product.Name,
+                AgeRestriction = product.AgeRestriction,
+                Description = product.Description,
+                Price = product.Price,
+                CompanyId = product.CompanyId,
+                CompanyName = product.Company.Name,
+                ProductImage = ImageUtilities.GetImagesInBase64(relPaths)
+            };
+            return productDTO;
         }
 
-        public IList<Product> GetProducts()
+        public IList<ProductDTO> GetProducts()
         {
-            return _context.Products.Include(c=>c.Company).ToList();
+            List<ProductDTO> products = new();
+            _context.Products.Include(c => c.Company).ToList().ForEach(p => products.Add(new()
+            {
+                ProductId = p.ProductId,
+                Name = p.Name,
+                AgeRestriction = p.AgeRestriction,
+                Price = p.Price,
+                CompanyName = p.Company.Name
+            }));
+            return products;
         }
 
         public void UpdateProduct(int id, ProductDTO productDTO)
         {
             Product product = _context.Products.FirstOrDefault(p => p.ProductId == id);
 
-            product.Name = productDTO.Name;
-            product.Description = productDTO.Description;
-            product.AgeRestriction = productDTO.AgeRestriction;
-            product.Price = productDTO.Price;
-            product.CompanyId = productDTO.CompanyId;
+            if (product != null)
+            {
+                product.Name = productDTO.Name;
+                product.Description = productDTO.Description;
+                product.AgeRestriction = productDTO.AgeRestriction;
+                product.Price = productDTO.Price;
+                product.CompanyId = productDTO.CompanyId;
 
-            _context.Products.Update(product);
+                _context.Products.Update(product);
 
-            _context.SaveChanges();
+                _context.SaveChanges();
+            }
         }
 
         public bool ProductExists(int id)
