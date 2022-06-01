@@ -37,7 +37,7 @@ namespace DataAccess.Migrations
 
                     b.HasKey("CompanyId");
 
-                    b.ToTable("Companies");
+                    b.ToTable("Companies", (string)null);
 
                     b.HasData(
                         new
@@ -87,7 +87,7 @@ namespace DataAccess.Migrations
 
                     b.HasIndex("CompanyId");
 
-                    b.ToTable("Products");
+                    b.ToTable("Products", (string)null);
 
                     b.HasData(
                         new

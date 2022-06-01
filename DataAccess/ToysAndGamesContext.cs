@@ -15,8 +15,8 @@ namespace ToysAndGames.DataAccess
         {
 
         }
-        public DbSet<Product> Products { get; set; }
-        public DbSet<Company> Companies { get; set; }
+        public DbSet<Product> Products { get; set; } = null!;
+        public DbSet<Company> Companies { get; set; } = null!;
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
