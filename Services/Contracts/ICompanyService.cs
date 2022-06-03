@@ -5,7 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using ToysAndGames.Models.DTO;
 
-namespace Services.Contracts
+namespace ToysAndGames.Services.Contracts
 {
     public interface ICompanyService
     {
@@ -14,5 +14,6 @@ namespace Services.Contracts
         void UpdateCompany(int id, CompanyDTO companyDTO);
         void DeleteCompany(int id);
         bool CompanyExists(int id);
+        CompanyDTO GetCompanyById(int id);
     }
 }

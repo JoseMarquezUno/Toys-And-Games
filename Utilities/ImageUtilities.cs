@@ -26,5 +26,9 @@ namespace Utilities
             }
             return imagesBase64;
         }
+        public static string GenerateImageName()
+        {
+            return "img_"+ DateTime.Now.Ticks.ToString();
+        }
     }
 }

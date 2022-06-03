@@ -1,10 +1,3 @@
-using Moq;
-using Newtonsoft.Json;
-using ToysAndGames.Models;
-using ToysAndGames.Models.DTO;
-using ToysAndGames.Services.Contracts;
-using WebApiTests.TestData;
-using Xunit.Abstractions;
 
 namespace ToysAndGames.WebApiTests
 {

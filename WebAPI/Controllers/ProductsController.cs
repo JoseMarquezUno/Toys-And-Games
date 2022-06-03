@@ -1,6 +1,4 @@
-﻿using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc;
-using ToysAndGames.Models;
+﻿using Microsoft.AspNetCore.Mvc;
 using ToysAndGames.Models.DTO;
 using ToysAndGames.Services.Contracts;
 

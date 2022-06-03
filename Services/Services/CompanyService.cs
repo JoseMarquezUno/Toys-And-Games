@@ -1,5 +1,4 @@
-﻿using Services.Contracts;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -7,8 +6,9 @@ using System.Threading.Tasks;
 using ToysAndGames.DataAccess;
 using ToysAndGames.Models;
 using ToysAndGames.Models.DTO;
+using ToysAndGames.Services.Contracts;
 
-namespace Services.Services
+namespace ToysAndGames.Services.Services
 {
     public class CompanyService : ICompanyService
     {
@@ -37,18 +37,30 @@ namespace Services.Services
         public void DeleteCompany(int id)
         {
             Company company = _context.Companies.FirstOrDefault(c => c.CompanyId == id);
-            if (company!=null)
+            if (company != null)
             {
                 _context.Companies.Remove(company);
-                _context.SaveChanges(); 
+                _context.SaveChanges();
             }
         }
 
         public IList<CompanyDTO> GetCompanies()
         {
             List<CompanyDTO> companies = new();
-            _context.Companies.ToList().ForEach(c=>companies.Add(new CompanyDTO { CompanyId = c.CompanyId, Name = c.Name}));
+            _context.Companies.ToList().ForEach(c => companies.Add(new CompanyDTO { CompanyId = c.CompanyId, Name = c.Name }));
             return companies;
+        }
+
+        public CompanyDTO GetCompanyById(int id)
+        {
+            Company company = _context.Companies.FirstOrDefault(c => c.CompanyId == id);
+            CompanyDTO companyDTO = new();
+            if (company != null)
+            {
+                companyDTO.Name = company.Name;
+                companyDTO.CompanyId = company.CompanyId;
+            }
+            return companyDTO;
         }
 
         public void UpdateCompany(int id, CompanyDTO companyDTO)

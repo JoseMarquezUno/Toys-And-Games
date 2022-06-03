@@ -60,7 +60,11 @@ namespace ToysAndGames.Services.Services
                 Price = product.Price,
                 CompanyId = product.CompanyId,
                 CompanyName = product.Company.Name,
-                ProductImage = ImageUtilities.GetImagesInBase64(relPaths)
+                ProductImage = product.ProductImages.Select(p => new ProductImageDTO
+                {
+                    Name = p.ImagePath
+                }).ToList()
+                //ImageUtilities.GetImagesInBase64(relPaths)
             };
             return productDTO;
         }

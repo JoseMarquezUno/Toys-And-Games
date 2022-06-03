@@ -7,7 +7,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "WebAPI", "WebAPI\WebAPI.csp
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ToysAndGames.Models", "Models\ToysAndGames.Models.csproj", "{9AF5FC7C-9AA6-470C-9BC6-871B1ABF08EA}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Services", "Services\Services.csproj", "{FB5E794C-81C0-4746-BEF7-5E9B6B079A80}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ToysAndGames.Services", "Services\ToysAndGames.Services.csproj", "{FB5E794C-81C0-4746-BEF7-5E9B6B079A80}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DataAccess", "DataAccess\DataAccess.csproj", "{AFBB5509-067F-46D7-B9D7-AAB545B15246}"
 EndProject
