@@ -59,17 +59,20 @@ namespace ToysAndGames.Services.Services
         {
             List<ProductImage> productImages = _context.ProductImages.Where(p => p.ProductId == productId).ToList();
             List<ProductImageDTO> productImageDTOs = new();
-            string assemblyDir = Path.GetDirectoryName(Assembly.GetCallingAssembly().Location);
-            List<string> relPaths = productImages.Select(p => p.ImagePath).ToList();
-            List<string> imagesBase64 = ImageUtilities.GetImagesInBase64(ImageUtilities.GetImagePathsFromAssembly(assemblyDir, relPaths));
-
-            for (int i = 0; i < relPaths.Count; i++)
+            if (productImages.Count>0)
             {
-                productImageDTOs.Add(new ProductImageDTO
+                string assemblyDir = Path.GetDirectoryName(Assembly.GetCallingAssembly().Location);
+                List<string> relPaths = productImages.Select(p => p.ImagePath).ToList();
+                List<string> imagesBase64 = ImageUtilities.GetImagesInBase64(ImageUtilities.GetImagePathsFromAssembly(assemblyDir, relPaths));
+
+                for (int i = 0; i < relPaths.Count; i++)
                 {
-                    Name = relPaths[i],
-                    ImageBase64 = imagesBase64[i]
-                });
+                    productImageDTOs.Add(new ProductImageDTO
+                    {
+                        Name = relPaths[i],
+                        ImageBase64 = imagesBase64[i]
+                    });
+                } 
             }
 
             return productImageDTOs;

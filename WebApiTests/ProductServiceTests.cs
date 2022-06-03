@@ -14,32 +14,13 @@ namespace ToysAndGames.WebApiTests
             //Arrange
             var productsMock = new Mock<IProductService>();
             productsMock.Setup(p => p.GetProducts())
-                .Returns(new[]{new ProductDTO
-                {
-                    ProductId = 1,
-                    Name = "Hot Wheels",
-                    Description = "Twin Mill",
-                    AgeRestriction = 3,
-                    CompanyId = 1,
-                    Price = 25,
-                    CompanyName = "Mattel" 
-                },
-                new ProductDTO
-                {
-                    ProductId = 1,
-                    Name = "Monopoly",
-                    Description = null,
-                    AgeRestriction = null,
-                    CompanyId = 2,
-                    Price = 250,
-                    CompanyName = "Hasbro" 
-                }});
+                .Returns(new List<ProductDTO> { new ProductDTO(),
+                new ProductDTO()});
 
             //Act
             var result = productsMock.Object.GetProducts();
 
             //Assert
-            Assert.NotNull(result);
             Assert.NotEmpty(result);
             _outputHelper.WriteLine(JsonConvert.SerializeObject(result));
 
@@ -57,18 +38,17 @@ namespace ToysAndGames.WebApiTests
             var result = productsMock.Object.GetProducts();
 
             //Assert
-            Assert.NotNull(result);
             Assert.Empty(result);
             _outputHelper.WriteLine(JsonConvert.SerializeObject(result));
         }
 
         [Theory]
         [GetProductByIdData]
-        public void GetProductById_ReturnsProduct_IfProductIdExists(int id, bool isNull)
+        public void GetProductById_ReturnsProduct_IfProductIdExists(int id, bool expected)
         {
             //Arrange
             var productsMock = new Mock<IProductService>();
-            productsMock.Setup(p => p.GetProductById(It.IsInRange<int>(1,4,Moq.Range.Inclusive)))
+            productsMock.Setup(p => p.GetProductById(It.IsInRange<int>(1, 4, Moq.Range.Inclusive)))
                 .Returns(new ProductDTO
                 {
                     ProductId = id,
@@ -84,16 +64,12 @@ namespace ToysAndGames.WebApiTests
             var result = productsMock.Object.GetProductById(id);
 
             //Assert
-            Assert.Equal(isNull, result == null);
-            if (result != null)
-            {
-                Assert.Equal(id, result.ProductId); 
-            }
+            Assert.Equal(expected, result == null);
             _outputHelper.WriteLine(JsonConvert.SerializeObject(result));
         }
 
         [Fact]
-        public void AddProduct_ReturnsInt()
+        public void AddProduct_ReturnsProductId()
         {
             //Arrange
             ProductDTO productDTO = new()
@@ -104,7 +80,7 @@ namespace ToysAndGames.WebApiTests
                 Price = 25.6m,
                 CompanyId = 1
             };
-            
+
             var productsMock = new Mock<IProductService>();
             productsMock.Setup(p => p.AddProduct(It.IsAny<ProductDTO>()))
                 .Returns(productDTO.ProductId);
@@ -113,6 +89,25 @@ namespace ToysAndGames.WebApiTests
 
             //Assert
             Assert.IsType<int>(result);
+            _outputHelper.WriteLine(result.ToString());
+        }
+
+        [Theory]
+        [ProductExistsData]
+        public void ProductExists_ReturnsTrueIfProductExists(int productId, bool expected)
+        {
+            //Arrange
+            var productsMock = new Mock<IProductService>();
+            productsMock
+                .Setup(p => p.ProductExists(It.IsInRange<int>(1, 4, Moq.Range.Inclusive)))
+                .Returns(true);
+
+            //Act
+            var result = productsMock.Object.ProductExists(productId);
+
+            //Assert
+            Assert.Equal(expected, result);
+            _outputHelper.WriteLine(result.ToString());
         }
     }
 }

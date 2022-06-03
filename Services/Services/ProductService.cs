@@ -64,7 +64,7 @@ namespace ToysAndGames.Services.Services
                 {
                     Name = p.ImagePath
                 }).ToList()
-                //ImageUtilities.GetImagesInBase64(relPaths)
+                
             };
             return productDTO;
         }
