@@ -19,13 +19,17 @@ namespace ToysAndGames.Services.Services
         }
         public int AddCompany(CompanyDTO companyDTO)
         {
-            Company company = new Company()
+            if (companyDTO != null)
             {
-                Name = companyDTO.Name
-            };
-            _context.Companies.Add(company);
-            _context.SaveChanges();
-            return company.CompanyId;
+                Company company = new Company()
+                {
+                    Name = companyDTO.Name
+                };
+                _context.Companies.Add(company);
+                _context.SaveChanges();
+                return company.CompanyId; 
+            }
+            return -1;
         }
 
         public bool CompanyExists(int id)
@@ -70,7 +74,7 @@ namespace ToysAndGames.Services.Services
             {
                 company.Name = companyDTO.Name;
 
-                _context.Update(company);
+                _context.Companies.Update(company);
                 _context.SaveChanges();
             }
         }

@@ -22,18 +22,22 @@ namespace ToysAndGames.Services.Services
         }
         public int AddProduct(ProductDTO productDTO)
         {
-            Product product = new()
+            if (productDTO!=null)
             {
-                Name = productDTO.Name,
-                Description = productDTO.Description,
-                AgeRestriction = productDTO.AgeRestriction,
-                Price = productDTO.Price,
-                CompanyId = productDTO.CompanyId
-            };
+                Product product = new()
+                {
+                    Name = productDTO.Name,
+                    Description = productDTO.Description,
+                    AgeRestriction = productDTO.AgeRestriction,
+                    Price = productDTO.Price,
+                    CompanyId = productDTO.CompanyId
+                };
 
-            _context.Products.Add(product);
-            _context.SaveChanges();
-            return product.ProductId;
+                _context.Products.Add(product);
+                _context.SaveChanges();
+                return product.ProductId; 
+            }
+            return -1;
         }
 
         public void DeleteProduct(int id)

@@ -24,24 +24,27 @@ namespace ToysAndGames.Services.Services
         {
             string fileName = string.Empty;
             string path = string.Empty;
-            string asmDir = Path.GetDirectoryName(Assembly.GetCallingAssembly().Location);
-            List<ProductImage> images = new();
-            foreach (var image in productImages)
+            if (productImages.Count>0)
             {
-                fileName = ImageUtilities.GenerateImageName();
-                path = "Images\\" + fileName;
-
-                images.Add(new()
+                string asmDir = Path.GetDirectoryName(Assembly.GetCallingAssembly().Location);
+                List<ProductImage> images = new();
+                foreach (var image in productImages)
                 {
-                    ProductId = productId,
-                    ImagePath = path
-                });
-                byte[] bytes = Convert.FromBase64String(image.ImageBase64);
-                path = asmDir +"\\" + path+".jpg";
-                File.WriteAllBytes(path, bytes);
+                    fileName = ImageUtilities.GenerateImageName();
+                    path = "Images\\" + fileName;
+
+                    images.Add(new()
+                    {
+                        ProductId = productId,
+                        ImagePath = path
+                    });
+                    byte[] bytes = Convert.FromBase64String(image.ImageBase64);
+                    path = asmDir + "\\" + path + ".jpg";
+                    File.WriteAllBytes(path, bytes);
+                }
+                _context.ProductImages.AddRange(images);
+                _context.SaveChanges(); 
             }
-            _context.ProductImages.AddRange(images);
-            _context.SaveChanges();
         }
 
         public void DeleteProductImage(string imageName)

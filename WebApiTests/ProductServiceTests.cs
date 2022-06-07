@@ -1,4 +1,10 @@
 
+using Microsoft.EntityFrameworkCore;
+using ToysAndGames.DataAccess;
+using ToysAndGames.Models;
+using ToysAndGames.Services.Services;
+using WebApiTests.Utilities;
+
 namespace ToysAndGames.WebApiTests
 {
     public class ProductServiceTests
@@ -8,6 +14,8 @@ namespace ToysAndGames.WebApiTests
         {
             _outputHelper = outputHelper;
         }
+
+        [Trait("Product", "Interface")]
         [Fact]
         public void GetProducts_ReturnsProducts()
         {
@@ -26,6 +34,7 @@ namespace ToysAndGames.WebApiTests
 
         }
 
+        [Trait("Product", "Interface")]
         [Fact]
         public void GetProducts_ReturnsEmptyList()
         {
@@ -42,6 +51,7 @@ namespace ToysAndGames.WebApiTests
             _outputHelper.WriteLine(JsonConvert.SerializeObject(result));
         }
 
+        [Trait("Product", "Interface")]
         [Theory]
         [GetProductByIdData]
         public void GetProductById_ReturnsProduct_IfProductIdExists(int id, bool expected)
@@ -68,6 +78,7 @@ namespace ToysAndGames.WebApiTests
             _outputHelper.WriteLine(JsonConvert.SerializeObject(result));
         }
 
+        [Trait("Product", "Interface")]
         [Fact]
         public void AddProduct_ReturnsProductId()
         {
@@ -92,6 +103,7 @@ namespace ToysAndGames.WebApiTests
             _outputHelper.WriteLine(result.ToString());
         }
 
+        [Trait("Product", "Interface")]
         [Theory]
         [ProductExistsData]
         public void ProductExists_ReturnsTrueIfProductExists(int productId, bool expected)
@@ -108,6 +120,218 @@ namespace ToysAndGames.WebApiTests
             //Assert
             Assert.Equal(expected, result);
             _outputHelper.WriteLine(result.ToString());
+        }
+
+        [Trait("Product", "Context")]
+        [Fact]
+        public void UpdateProduct_GivenExistingProduct_UpdatesProduct_UsingContext()
+        {
+            //Arrange
+            var productDTO = new ProductDTO
+            {
+                ProductId = 1,
+                Name = "Name1",
+                AgeRestriction = 55,
+                Description = "Desc",
+                CompanyId = 1,
+                Price = 145.99m
+            };
+
+
+            var productsMockSet = DbSetMockUtility.GetQueryableMock(new Product
+            {
+                ProductId = 1,
+                Name = "Name",
+                AgeRestriction = null,
+                Description = null,
+                CompanyId = 1,
+                Price = 100
+            });
+
+            var productMockContext = new Mock<ToysAndGamesContext>();
+            productMockContext.Setup(m => m.Products).Returns(productsMockSet.Object);
+
+            ProductService productService = new ProductService(productMockContext.Object);
+
+            //Act
+            productService.UpdateProduct(productDTO.ProductId, productDTO);
+            var result = productMockContext.Object.Products.FirstOrDefault(p => p.ProductId == productDTO.ProductId);
+
+            //Assert
+            productsMockSet.Verify(p => p.Update(It.IsAny<Product>()), Times.Once);
+            productMockContext.Verify(p => p.SaveChanges(), Times.Once);
+
+            _outputHelper.WriteLine($"ProductDTO with updated fields: {JsonConvert.SerializeObject(productDTO)}");
+            _outputHelper.WriteLine($"Product after update: {JsonConvert.SerializeObject(result)}");
+        }
+
+        [Trait("Product", "Context")]
+        [Fact]
+        public void UpdateProduct_GivenNoExistingProduct_DoesNotExecuteContextMethods_UsingContext()
+        {
+            //Arrange
+            var productDTO = new ProductDTO
+            {
+                ProductId = 10,
+                Name = "Name1",
+                AgeRestriction = 55,
+                Description = "Desc",
+                CompanyId = 1,
+                Price = 145.99m
+            };
+
+
+            var productsMockSet = DbSetMockUtility.GetQueryableMock(new Product
+            {
+                ProductId = 1,
+                Name = "Name",
+                AgeRestriction = null,
+                Description = null,
+                CompanyId = 1,
+                Price = 100
+            });
+
+            var productMockContext = new Mock<ToysAndGamesContext>();
+            productMockContext.Setup(m => m.Products).Returns(productsMockSet.Object);
+
+            ProductService productService = new ProductService(productMockContext.Object);
+
+            //Act
+            productService.UpdateProduct(productDTO.ProductId, productDTO);
+            var result = productMockContext.Object.Products.FirstOrDefault(p => p.ProductId == productDTO.ProductId);
+
+            //Assert
+            Assert.Null(result);
+            productsMockSet.Verify(p => p.Update(It.IsAny<Product>()), Times.Never);
+            productMockContext.Verify(p => p.SaveChanges(), Times.Never);
+
+            _outputHelper.WriteLine($"ProductDTO with updated fields: {JsonConvert.SerializeObject(productDTO)}");
+            _outputHelper.WriteLine($"Product after update: {JsonConvert.SerializeObject(result)}");
+        }
+
+        [Trait("Product", "Context")]
+        [Fact]
+        public void AddProduct_GivenProductDto_ReturnsIntId_UsingContext()
+        {
+            //Arrange
+            var productDTO = new ProductDTO
+            {
+                Name = "Name1",
+                AgeRestriction = 55,
+                Description = "Desc",
+                CompanyId = 1,
+                Price = 145.99m
+            };
+
+
+            var productsMockSet = new Mock<DbSet<Product>>();
+
+            var productMockContext = new Mock<ToysAndGamesContext>();
+            productMockContext.Setup(m => m.Products).Returns(productsMockSet.Object);
+
+            ProductService productService = new ProductService(productMockContext.Object);
+
+            //Act
+            var result = productService.AddProduct(productDTO);
+
+            //Assert
+            Assert.IsType<int>(result);
+            productsMockSet.Verify(p => p.Add(It.IsAny<Product>()), Times.Once);
+            productMockContext.Verify(p => p.SaveChanges(), Times.Once);
+
+            _outputHelper.WriteLine($"ProductId added: {result}");
+        }
+
+
+        [Trait("Product", "Context")]
+        [Fact]
+        public void AddProduct_GivenNullOLbject_ReturnsIdMinus1_UsingContext()
+        {
+            //Arrange
+            ProductDTO productDTO = null;
+
+            var productsMockSet = new Mock<DbSet<Product>>();
+
+            var productMockContext = new Mock<ToysAndGamesContext>();
+            productMockContext.Setup(m => m.Products).Returns(productsMockSet.Object);
+
+            ProductService productService = new ProductService(productMockContext.Object);
+
+            //Act
+            var result = productService.AddProduct(productDTO);
+
+            //Assert
+            Assert.Equal(-1, result);
+            productsMockSet.Verify(p => p.Add(It.IsAny<Product>()), Times.Never);
+            productMockContext.Verify(p => p.SaveChanges(), Times.Never);
+
+            _outputHelper.WriteLine($"ProductId added: {result}");
+        }
+
+        [Trait("Product", "Context")]
+        [Fact]
+        public void DeleteProduct_RemovesProduct_UsingContext()
+        {
+            //Arrange
+            var productId = 1;
+
+
+            var productsMockSet = DbSetMockUtility.GetQueryableMock(new Product
+            {
+                ProductId = 1,
+                Name = "Name",
+                AgeRestriction = null,
+                Description = null,
+                CompanyId = 1,
+                Price = 100
+            });
+
+            var productMockContext = new Mock<ToysAndGamesContext>();
+            productMockContext.Setup(m => m.Products).Returns(productsMockSet.Object);
+
+            ProductService productService = new ProductService(productMockContext.Object);
+
+            //Act
+            productService.DeleteProduct(productId);
+
+            //Assert
+            productsMockSet.Verify(p => p.Remove(It.IsAny<Product>()), Times.Once);
+            productMockContext.Verify(p => p.SaveChanges(), Times.Once);
+
+            _outputHelper.WriteLine($"ProductId deleted: {productId}");
+        }
+
+        [Trait("Product", "Context")]
+        [Fact]
+        public void DeleteProduct_GivenNoExistingProduct_DoesNotRemovesProduct_UsingContext()
+        {
+            //Arrange
+            var productId = 10;
+
+
+            var productsMockSet = DbSetMockUtility.GetQueryableMock(new Product
+            {
+                ProductId = 1,
+                Name = "Name",
+                AgeRestriction = null,
+                Description = null,
+                CompanyId = 1,
+                Price = 100
+            });
+
+            var productMockContext = new Mock<ToysAndGamesContext>();
+            productMockContext.Setup(m => m.Products).Returns(productsMockSet.Object);
+
+            ProductService productService = new ProductService(productMockContext.Object);
+
+            //Act
+            productService.DeleteProduct(productId);
+
+            //Assert
+            productsMockSet.Verify(p => p.Remove(It.IsAny<Product>()), Times.Never);
+            productMockContext.Verify(p => p.SaveChanges(), Times.Never);
+
+            _outputHelper.WriteLine($"Attempted deletion of ProductId: {productId}");
         }
     }
 }

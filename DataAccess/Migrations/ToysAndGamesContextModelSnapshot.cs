@@ -37,7 +37,7 @@ namespace DataAccess.Migrations
 
                     b.HasKey("CompanyId");
 
-                    b.ToTable("Companies");
+                    b.ToTable("Companies", (string)null);
 
                     b.HasData(
                         new
@@ -87,7 +87,7 @@ namespace DataAccess.Migrations
 
                     b.HasIndex("CompanyId");
 
-                    b.ToTable("Products");
+                    b.ToTable("Products", (string)null);
 
                     b.HasData(
                         new
@@ -144,31 +144,31 @@ namespace DataAccess.Migrations
 
                     b.HasIndex("ProductId");
 
-                    b.ToTable("ProductImages");
+                    b.ToTable("ProductImages", (string)null);
 
                     b.HasData(
                         new
                         {
                             ProductImageId = 1,
-                            ImagePath = "\\Images\\TwinMill.jpg",
+                            ImagePath = "Images\\TwinMill.jpg",
                             ProductId = 1
                         },
                         new
                         {
                             ProductImageId = 2,
-                            ImagePath = "\\Images\\Monopoly.jfif",
+                            ImagePath = "Images\\Monopoly.jfif",
                             ProductId = 2
                         },
                         new
                         {
                             ProductImageId = 3,
-                            ImagePath = "\\Images\\maquinaderaspados.jpg",
+                            ImagePath = "Images\\maquinaderaspados.jpg",
                             ProductId = 3
                         },
                         new
                         {
                             ProductImageId = 4,
-                            ImagePath = "\\Images\\TwinMill2.jpg",
+                            ImagePath = "Images\\TwinMill2.jpg",
                             ProductId = 4
                         });
                 });
