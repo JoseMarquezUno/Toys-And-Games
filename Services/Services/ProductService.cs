@@ -22,7 +22,7 @@ namespace ToysAndGames.Services.Services
         }
         public int AddProduct(ProductDTO productDTO)
         {
-            if (productDTO!=null)
+            if (productDTO != null)
             {
                 Product product = new()
                 {
@@ -35,7 +35,7 @@ namespace ToysAndGames.Services.Services
 
                 _context.Products.Add(product);
                 _context.SaveChanges();
-                return product.ProductId; 
+                return product.ProductId;
             }
             return -1;
         }
@@ -54,23 +54,22 @@ namespace ToysAndGames.Services.Services
         {
             string path = Path.GetDirectoryName(Assembly.GetCallingAssembly().Location);
             Product product = _context.Products.Include(c => c.Company).Include(p => p.ProductImages).FirstOrDefault(p => p.ProductId == id);
-            List<string> relPaths = ImageUtilities.GetImagePathsFromAssembly(path, product.ProductImages.Select(p => p.ImagePath).ToList());
-            ProductDTO productDTO = new()
+            if (product!=null)
             {
-                ProductId = product.ProductId,
-                Name = product.Name,
-                AgeRestriction = product.AgeRestriction,
-                Description = product.Description,
-                Price = product.Price,
-                CompanyId = product.CompanyId,
-                CompanyName = product.Company.Name
-                //ProductImage = product.ProductImages.Select(p => new ProductImageDTO
-                //{
-                //    Name = p.ImagePath
-                //}).ToList()
-                
-            };
-            return productDTO;
+                List<string> relPaths = ImageUtilities.GetImagePathsFromAssembly(path, product.ProductImages.Select(p => p.ImagePath).ToList());
+                ProductDTO productDTO = new()
+                {
+                    ProductId = product.ProductId,
+                    Name = product.Name,
+                    AgeRestriction = product.AgeRestriction,
+                    Description = product.Description,
+                    Price = product.Price,
+                    CompanyId = product.CompanyId,
+                    CompanyName = product.Company.Name
+                };
+                return productDTO; 
+            }
+            return null;
         }
 
         public IList<ProductDTO> GetProducts()

@@ -85,6 +85,7 @@ namespace ToysAndGames.WebApiTests
             //Arrange
             ProductDTO productDTO = new()
             {
+                ProductId = 1,
                 Name = "Hot Wheels",
                 Description = null,
                 AgeRestriction = null,
@@ -100,7 +101,7 @@ namespace ToysAndGames.WebApiTests
 
             //Assert
             Assert.IsType<int>(result);
-            _outputHelper.WriteLine(result.ToString());
+            _outputHelper.WriteLine($"ProductId returned: {result.ToString()}");
         }
 
         [Trait("Product", "Interface")]
@@ -216,6 +217,7 @@ namespace ToysAndGames.WebApiTests
             //Arrange
             var productDTO = new ProductDTO
             {
+                ProductId = 1,
                 Name = "Name1",
                 AgeRestriction = 55,
                 Description = "Desc",

@@ -19,13 +19,15 @@ namespace WebAPI.Controllers
             return _productService.GetProducts();
         }
 
-        [HttpGet("Product/{id}")]
+        [HttpGet]
+        [Route("Product/{id}")]
         public ProductDTO GetProduct(int id)
         {
             return _productService.GetProductById(id);
         }
 
-        [HttpPut("Product/{id}")]
+        [HttpPut]
+        [Route("Product/{id}")]
         public IActionResult UpdateProduct(int id, ProductDTO productDTO)
         {
             if (_productService.ProductExists(id))
@@ -39,7 +41,8 @@ namespace WebAPI.Controllers
             return Ok(productDTO);
         }
 
-        [HttpPost("Product")]
+        [HttpPost]
+        [Route("Product")]
         public IActionResult AddProduct(ProductDTO productDTO)
         {
             int id = _productService.AddProduct(productDTO);
@@ -48,7 +51,8 @@ namespace WebAPI.Controllers
                 productDTO); 
         }
 
-        [HttpDelete("Product/{id}")]
+        [HttpDelete]
+        [Route("Product/{id}")]
         public IActionResult DeleteProduct(int id)
         {
             if (_productService.ProductExists(id))

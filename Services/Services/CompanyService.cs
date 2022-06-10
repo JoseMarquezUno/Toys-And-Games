@@ -64,7 +64,7 @@ namespace ToysAndGames.Services.Services
                 companyDTO.Name = company.Name;
                 companyDTO.CompanyId = company.CompanyId;
             }
-            return companyDTO;
+            return companyDTO.Name==null?null:companyDTO;
         }
 
         public void UpdateCompany(int id, CompanyDTO companyDTO)

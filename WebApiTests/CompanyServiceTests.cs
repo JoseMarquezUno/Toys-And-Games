@@ -59,7 +59,7 @@ namespace WebApiTests
             var companiesMock = new Mock<ICompanyService>();
             companiesMock
                 .Setup(c => c.GetCompanyById(It.IsInRange<int>(1, 3, Moq.Range.Inclusive)))
-                .Returns(new CompanyDTO());
+                .Returns(new CompanyDTO { CompanyId = companyId});
 
             //Act
             var result = companiesMock.Object.GetCompanyById(companyId);
@@ -77,6 +77,7 @@ namespace WebApiTests
             //Arrange
             CompanyDTO companyDTO = new CompanyDTO()
             {
+                CompanyId = 1,
                 Name = "company"
             };
 
@@ -274,7 +275,7 @@ namespace WebApiTests
             companiesMockSet.Verify(c => c.Remove(It.IsAny<Company>()), Times.Never);
             mockContext.Verify(c => c.SaveChanges(), Times.Never);
 
-            _outputHelper.WriteLine($"CompanyId deleted: {companyId}");
+            _outputHelper.WriteLine($"Attempted deletion of CompanyId: {companyId}");
         }
     }
 }

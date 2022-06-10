@@ -11,13 +11,11 @@ namespace WebApiTests
 {
     public class ProductImagesControllerInMemoryTests : IClassFixture<CustomWebApplicationFactory<Program>>
     {
-        private readonly CustomWebApplicationFactory<Program> _factory;
         private readonly ITestOutputHelper _outputHelper;
         private readonly HttpClient _client;
         public ProductImagesControllerInMemoryTests(ITestOutputHelper outputHelper, CustomWebApplicationFactory<Program> factory)
         {
             _outputHelper = outputHelper;
-            _factory = factory;
             _client = factory.CreateClient();
         }
 

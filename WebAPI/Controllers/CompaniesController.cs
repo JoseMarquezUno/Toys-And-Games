@@ -26,7 +26,7 @@ namespace WebAPI.Controllers
         }
         [HttpPost]
         [Route("Company")]
-        public IActionResult AddCopmany(CompanyDTO company)
+        public IActionResult AddCompany(CompanyDTO company)
         {
             int id = _companyService.AddCompany(company);
             return CreatedAtAction(nameof(GetCompany),
