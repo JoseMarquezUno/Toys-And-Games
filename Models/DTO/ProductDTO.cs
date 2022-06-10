@@ -20,6 +20,6 @@ namespace ToysAndGames.Models.DTO
         public string CompanyName { get; set; }
         [Range(1.00, 1000.00)]
         public decimal Price { get; set; }
-        public IList<ProductImageDTO> ProductImage { get; set; }
+        //public IList<ProductImageDTO> ProductImage { get; set; }
     }
 }

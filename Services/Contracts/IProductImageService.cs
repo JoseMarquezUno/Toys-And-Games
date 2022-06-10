@@ -10,7 +10,7 @@ namespace ToysAndGames.Services.Contracts
     public interface IProductImageService
     {
         void AddProductImage(IList<ProductImageDTO> productImages, int productId);
-        void DeleteProductImage(string imageName);
+        void DeleteProductImage(int productImageId);
         IList<ProductImageDTO> GetProductImages(int productId);
     }
 }

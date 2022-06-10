@@ -24,45 +24,59 @@ namespace ToysAndGames.Services.Services
         {
             string fileName = string.Empty;
             string path = string.Empty;
-            if (productImages.Count>0)
+            if (productImages.Count > 0)
             {
                 string asmDir = Path.GetDirectoryName(Assembly.GetCallingAssembly().Location);
                 List<ProductImage> images = new();
                 foreach (var image in productImages)
                 {
                     fileName = ImageUtilities.GenerateImageName();
-                    path = "Images\\" + fileName;
+                    path = "Images\\" + fileName+ ".jpg";
 
                     images.Add(new()
                     {
                         ProductId = productId,
-                        ImagePath = path
+                        ImagePath = path 
                     });
                     byte[] bytes = Convert.FromBase64String(image.ImageBase64);
-                    path = asmDir + "\\" + path + ".jpg";
-                    File.WriteAllBytes(path, bytes);
+                    path = asmDir + "\\" + path;
+                    var parentPath = Directory.GetParent(path).FullName;
+                    if (Directory.Exists(parentPath))
+                    {
+                        File.WriteAllBytes(path, bytes); 
+                    }
+                    else
+                    {
+                        Directory.CreateDirectory(parentPath);
+                        File.WriteAllBytes(path, bytes);
+                    }
                 }
                 _context.ProductImages.AddRange(images);
-                _context.SaveChanges(); 
+                _context.SaveChanges();
+
             }
         }
 
-        public void DeleteProductImage(string imageName)
+        public void DeleteProductImage(int id)
         {
             string asmDir = Path.GetDirectoryName(Assembly.GetCallingAssembly().Location);
-            ProductImage image = _context.ProductImages.FirstOrDefault(p => p.ImagePath.Contains(imageName));
+            ProductImage image = _context.ProductImages.FirstOrDefault(p => p.ProductImageId == id);
             if (image != null)
             {
+                var imagePath = Path.Combine(asmDir, image.ImagePath);
                 _context.ProductImages.Remove(image);
                 _context.SaveChanges();
-                File.Delete(asmDir+"\\Images\\" + imageName);
+                if (File.Exists(imagePath))
+                {
+                    File.Delete(imagePath); 
+                }
             }
         }
         public IList<ProductImageDTO> GetProductImages(int productId)
         {
             List<ProductImage> productImages = _context.ProductImages.Where(p => p.ProductId == productId).ToList();
             List<ProductImageDTO> productImageDTOs = new();
-            if (productImages.Count>0)
+            if (productImages.Count > 0)
             {
                 string assemblyDir = Path.GetDirectoryName(Assembly.GetCallingAssembly().Location);
                 List<string> relPaths = productImages.Select(p => p.ImagePath).ToList();
@@ -72,10 +86,11 @@ namespace ToysAndGames.Services.Services
                 {
                     productImageDTOs.Add(new ProductImageDTO
                     {
+                        ProductImageId = productImages[i].ProductImageId,
                         Name = relPaths[i],
                         ImageBase64 = imagesBase64[i]
                     });
-                } 
+                }
             }
 
             return productImageDTOs;

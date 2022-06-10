@@ -15,6 +15,7 @@ namespace WebAPI.Controllers
         }
 
         [HttpGet]
+        [Route("{productId}")]
         public IList<ProductImageDTO> GetProductImages(int productId)
         {
             return _imageService.GetProductImages(productId);
@@ -22,21 +23,21 @@ namespace WebAPI.Controllers
 
         [HttpPost]
         [Route("Product/{id}")]
-        public IActionResult AddProductImages(List<ProductImageDTO> productImages, int id)
+        public IActionResult AddProductImages(int id, List<ProductImageDTO> productImages)
         {
             if (productImages.Count<1)
             {
                 return BadRequest();
             }
             _imageService.AddProductImage(productImages, id);
-            return CreatedAtAction(nameof(GetProductImages),id,value:null);
+            return Ok();
         }
 
         [HttpDelete]
-        [Route("ProductImage/{imageName}")]
-        public IActionResult DeleteProductImage(string imageName)
+        [Route("ProductImage/{id}")]
+        public IActionResult DeleteProductImage(int id)
         {
-            _imageService.DeleteProductImage(imageName);
+            _imageService.DeleteProductImage(id);
             return NoContent();
         }
     }

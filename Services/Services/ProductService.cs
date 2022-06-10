@@ -63,11 +63,11 @@ namespace ToysAndGames.Services.Services
                 Description = product.Description,
                 Price = product.Price,
                 CompanyId = product.CompanyId,
-                CompanyName = product.Company.Name,
-                ProductImage = product.ProductImages.Select(p => new ProductImageDTO
-                {
-                    Name = p.ImagePath
-                }).ToList()
+                CompanyName = product.Company.Name
+                //ProductImage = product.ProductImages.Select(p => new ProductImageDTO
+                //{
+                //    Name = p.ImagePath
+                //}).ToList()
                 
             };
             return productDTO;
