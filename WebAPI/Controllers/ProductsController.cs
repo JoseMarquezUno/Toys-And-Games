@@ -32,7 +32,7 @@ namespace WebAPI.Controllers
         {
             if (_productService.ProductExists(id))
             {
-                _productService.UpdateProduct(id, productDTO); 
+                _productService.UpdateProduct(id, productDTO);
             }
             else
             {
@@ -46,24 +46,30 @@ namespace WebAPI.Controllers
         public IActionResult AddProduct(ProductDTO productDTO)
         {
             int id = _productService.AddProduct(productDTO);
-            return CreatedAtAction(nameof(GetProduct),
-                new { id = id },
-                productDTO); 
+            //TODO: By naming convention these calls should be single lined, if its an object creation its ok to have it multiline
+            return CreatedAtAction(nameof(GetProduct), new { id }, productDTO);
         }
 
         [HttpDelete]
         [Route("Product/{id}")]
         public IActionResult DeleteProduct(int id)
         {
-            if (_productService.ProductExists(id))
+            try
             {
-                _productService.DeleteProduct(id);
+                if (_productService.ProductExists(id))
+                {
+                    _productService.DeleteProduct(id);
+                }
+                return NotFound($"Id: {id} was not found in the database");
+
             }
-            else
+            catch (Exception ex)
             {
-                return NotFound();
+                //TODO: Internal Server Error (500)
+                return StatusCode(StatusCodes.Status500InternalServerError, ex.Message);
             }
-            return NoContent();
+            ////TODO: Line unreachable
+            //return NoContent();
         }
     }
 }

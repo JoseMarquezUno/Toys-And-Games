@@ -64,7 +64,7 @@ namespace WebApiTests
 
             //Act
             var productsBeforeDeleteResponse = await _client.GetAsync("/api/Products");
-            var productDeleteResponse = await _client.DeleteAsync("/api/Products/Product/" + productId);
+            var productDeleteResponse = await _client.DeleteAsync($"/api/Products/Product/{productId}" );
             var productsAfterDeleteResponse = await _client.GetAsync("/api/Products");
             var productGetResponse = await _client.GetAsync("/api/Products/Product/" + productId);
 

@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Microsoft.EntityFrameworkCore;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -27,7 +28,7 @@ namespace ToysAndGames.Services.Services
                 };
                 _context.Companies.Add(company);
                 _context.SaveChanges();
-                return company.CompanyId; 
+                return company.CompanyId;
             }
             return -1;
         }
@@ -41,34 +42,48 @@ namespace ToysAndGames.Services.Services
         public void DeleteCompany(int id)
         {
             Company company = _context.Companies.FirstOrDefault(c => c.CompanyId == id);
-            if (company != null)
+            //TODO: As a recomendation start using the new "is/isnot" conventions which is more readable
+            if (company is not null)
             {
                 _context.Companies.Remove(company);
                 _context.SaveChanges();
             }
         }
 
-        public IList<CompanyDTO> GetCompanies()
+        public async Task<IList<CompanyDTO>> GetCompanies()
         {
-            List<CompanyDTO> companies = new();
-            _context.Companies.ToList().ForEach(c => companies.Add(new CompanyDTO { CompanyId = c.CompanyId, Name = c.Name }));
-            return companies;
+            //TODO: Use automapper instead of the manual conversion
+            //Kudos for the empty new() declaration! :) 
+            var companies = await _context.Companies.ToListAsync();
+            List<CompanyDTO> companiesDtos = new();
+            companies.ForEach(c => companiesDtos.Add(new CompanyDTO { CompanyId = c.CompanyId, Name = c.Name }));
+            return companiesDtos;
         }
 
-        public CompanyDTO GetCompanyById(int id)
+        public CompanyDTO? GetCompanyById(int id)
         {
-            Company company = _context.Companies.FirstOrDefault(c => c.CompanyId == id);
-            CompanyDTO companyDTO = new();
-            if (company != null)
+            try
             {
-                companyDTO.Name = company.Name;
-                companyDTO.CompanyId = company.CompanyId;
+                //TODO: How are you handling exceptions?
+                Company company = _context.Companies.First(c => c.CompanyId == id);
+                CompanyDTO companyDTO = new() 
+                {
+                    Name= company.Name,
+                    CompanyId = company.CompanyId
+                };
+                return companyDTO;
             }
-            return companyDTO.Name==null?null:companyDTO;
+            catch (Exception)
+            {
+                //Log Error
+                return null;
+            }
         }
+        
 
         public void UpdateCompany(int id, CompanyDTO companyDTO)
         {
+            //TODO: This is not wrong, but usually people use var when getting Queryes, because you could have an IQueryable
             Company company = _context.Companies.FirstOrDefault(c => c.CompanyId == id);
             if (company != null)
             {

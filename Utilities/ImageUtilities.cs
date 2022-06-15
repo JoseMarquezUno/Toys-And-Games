@@ -5,6 +5,7 @@ namespace Utilities
 {
     public static class ImageUtilities
     {
+        
         public static List<string> GetImagePathsFromAssembly(string assemblyDir, IList<string> relPaths)
         {
             List<string> paths = new();
@@ -28,6 +29,7 @@ namespace Utilities
         }
         public static string GenerateImageName()
         {
+            //TODO: Same,. use string interpolation
             return "img_"+ DateTime.Now.Ticks.ToString();
         }
     }
