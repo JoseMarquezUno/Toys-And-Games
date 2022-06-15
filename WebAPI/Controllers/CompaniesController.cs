@@ -14,9 +14,10 @@ namespace WebAPI.Controllers
             _companyService = companyService;
         }
         [HttpGet]
-        public IList<CompanyDTO> GetCompanies()
+        public async Task<ActionResult<IList<CompanyDTO>>> GetCompanies()
         {
-           return _companyService.GetCompanies();
+            //TODO: as a good practice use non-blocking/waiting code blocks in other words async/await calls to the controllers/services
+            return Ok(_companyService.GetCompanies());
         }
         [HttpGet]
         [Route("Company/{id}")]

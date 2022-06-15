@@ -9,8 +9,9 @@ namespace ToysAndGames.Models
 {
     public class Company
     {
+        //TODO: the naming convension of an ID should be only that, not ObjecID, this second one is used for a FK Backfill property
         public int CompanyId { get; set; }
-        [MaxLength(50)]
+      
         public string Name { get; set; }
     }
 }

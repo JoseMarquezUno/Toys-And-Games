@@ -11,9 +11,11 @@ builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
+//TODO: Move this to an static or Extension method inside the service as a good practice.
+//ToysAndGamesService.AddServices()
 builder.Services.AddScoped<IProductService, ProductService>();
 builder.Services.AddScoped<ICompanyService, CompanyService>();
-builder.Services.AddScoped<IProductImageService,ProductImageService>();
+builder.Services.AddScoped<IProductImageService, ProductImageService>();
 
 //DbContext
 builder.Services.AddDbContext<ToysAndGamesContext>(options =>

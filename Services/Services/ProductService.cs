@@ -22,6 +22,7 @@ namespace ToysAndGames.Services.Services
         }
         public int AddProduct(ProductDTO productDTO)
         {
+            //TODO: Change signature to void and throw exception in case the operation failed
             if (productDTO != null)
             {
                 Product product = new()
@@ -37,6 +38,7 @@ namespace ToysAndGames.Services.Services
                 _context.SaveChanges();
                 return product.ProductId;
             }
+            //TODO: Explain this :")
             return -1;
         }
 

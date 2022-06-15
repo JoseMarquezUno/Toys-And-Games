@@ -9,6 +9,6 @@ namespace ToysAndGames.Models.DTO
     public class CompanyDTO
     {
         public int CompanyId { get; set; }
-        public string Name { get; set; }
+        public string? Name { get; set; }
     }
 }

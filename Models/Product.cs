@@ -18,9 +18,14 @@ namespace ToysAndGames.Models
         [Range(0,100)]
         public int? AgeRestriction { get; set; }
         public int CompanyId { get; set; }
-        public Company Company { get; set; }
+        
         [Range(1.00,1000.00)]
         public decimal Price { get; set; }
+
+        //TODO: Use IList<T> Instead of ICollection:
+        //https://www.c-sharpcorner.com/UploadFile/78607b/difference-between-ienumerable-icollection-and-ilist-interf/
+        //Navigation Properties
         public ICollection<ProductImage> ProductImages { get; set; }
+        public Company Company { get; set; }
     }
 }
