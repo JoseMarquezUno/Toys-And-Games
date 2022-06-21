@@ -34,12 +34,13 @@ namespace WebApiTests
             var companiesBeforeAddResponse = await _client.GetAsync("/api/Companies");
             var companyAddResponse = await _client.PostAsync("/api/Companies/Company", httpContent);
             var companiesAfterAddResponse = await _client.GetAsync("/api/Companies");
-            var getAddedCompany = companyAddResponse.Headers.Location;
-            var companyGetResponse = await _client.GetAsync(getAddedCompany);
+            //var getAddedCompany = companyAddResponse.Headers.Location;
+            var companiesAfterAdd = JsonConvert.DeserializeObject<List<CompanyDTO>>(companiesAfterAddResponse.Content.ReadAsStringAsync().Result);
+            var companyGetResponse = await _client.GetAsync($"/api/Companies/Company/{companiesAfterAdd.Last().Id}");
 
             //Assert
             var companiesBeforeAdd = JsonConvert.DeserializeObject<List<CompanyDTO>>(companiesBeforeAddResponse.Content.ReadAsStringAsync().Result);
-            var companiesAfterAdd = JsonConvert.DeserializeObject<List<CompanyDTO>>(companiesAfterAddResponse.Content.ReadAsStringAsync().Result);
+            //var companiesAfterAdd = JsonConvert.DeserializeObject<List<CompanyDTO>>(companiesAfterAddResponse.Content.ReadAsStringAsync().Result);
             var companyGet = JsonConvert.DeserializeObject<CompanyDTO>(companyGetResponse.Content.ReadAsStringAsync().Result);
 
             Assert.NotEqual(companiesBeforeAdd.Count, companiesAfterAdd.Count);
@@ -61,9 +62,9 @@ namespace WebApiTests
 
             //Act
             var companiesBeforeDeleteResponse = await _client.GetAsync("/api/Companies");
-            var companyDeleteResponse = await _client.DeleteAsync("/api/Companies/Company/" + companyId);
+            var companyDeleteResponse = await _client.DeleteAsync($"/api/Companies/Company/{companyId}");
             var companiesAfterDeleteResponse = await _client.GetAsync("/api/Companies");
-            var companyGetResponse = await _client.GetAsync("/api/Companies/Company/" + companyId);
+            var companyGetResponse = await _client.GetAsync($"/api/Companies/Company/{companyId}");
 
             //Assert
             var companiesBeforeDelete = JsonConvert.DeserializeObject<List<CompanyDTO>>(companiesBeforeDeleteResponse.Content.ReadAsStringAsync().Result);
@@ -95,9 +96,9 @@ namespace WebApiTests
             var httpContent =  new StringContent(jsonObject,Encoding.UTF8,"application/json");
 
             //Act
-            var companyBeforeUpdateResponse = await _client.GetAsync("/api/Companies/Company/" + companyId);
-            var updateCompanyResponse = await _client.PutAsync("/api/Companies/Company/" + companyId, httpContent);
-            var companyAfterUpdateResponse = await _client.GetAsync("/api/Companies/Company/" + companyId);
+            var companyBeforeUpdateResponse = await _client.GetAsync($"/api/Companies/Company/{companyId}");
+            var updateCompanyResponse = await _client.PutAsync($"/api/Companies/Company/{companyId}", httpContent);
+            var companyAfterUpdateResponse = await _client.GetAsync($"/api/Companies/Company/{companyId}");
 
             //Assert
             var companyBeforeUpdate = JsonConvert.DeserializeObject<CompanyDTO>(companyBeforeUpdateResponse.Content.ReadAsStringAsync().Result);

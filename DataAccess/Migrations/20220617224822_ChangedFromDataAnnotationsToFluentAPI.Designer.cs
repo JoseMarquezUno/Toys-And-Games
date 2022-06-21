@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using ToysAndGames.DataAccess;
 
@@ -11,9 +12,10 @@ using ToysAndGames.DataAccess;
 namespace DataAccess.Migrations
 {
     [DbContext(typeof(ToysAndGamesContext))]
-    partial class ToysAndGamesContextModelSnapshot : ModelSnapshot
+    [Migration("20220617224822_ChangedFromDataAnnotationsToFluentAPI")]
+    partial class ChangedFromDataAnnotationsToFluentAPI
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder

@@ -3,17 +3,17 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using ToysAndGames.Models.DTO;
+using WebAPI.DTO;
 
 namespace ToysAndGames.Services.Contracts
 {
     public interface ICompanyService
     {
         Task<IList<CompanyDTO>> GetCompanies();
-        int AddCompany(CompanyDTO companyDTO);
-        void UpdateCompany(int id, CompanyDTO companyDTO);
-        void DeleteCompany(int id);
-        bool CompanyExists(int id);
-        CompanyDTO? GetCompanyById(int id);
+        Task AddCompany(CompanyDTO companyDTO);
+        Task UpdateCompany(int id, CompanyDTO companyDTO);
+        Task DeleteCompany(int id);
+        Task<bool> CompanyExists(int id);
+        Task<CompanyDTO?> GetCompanyById(int id);
     }
 }

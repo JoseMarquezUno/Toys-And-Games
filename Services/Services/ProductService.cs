@@ -7,110 +7,160 @@ using ToysAndGames.DataAccess;
 using ToysAndGames.Models;
 using ToysAndGames.Services.Contracts;
 using Microsoft.EntityFrameworkCore;
-using ToysAndGames.Models.DTO;
 using System.Reflection;
 using Utilities;
+using WebAPI.DTO;
+using AutoMapper;
 
 namespace ToysAndGames.Services.Services
 {
     public class ProductService : IProductService
     {
         private readonly ToysAndGamesContext _context;
-        public ProductService(ToysAndGamesContext context)
+        private readonly IMapper _mapper;
+        public ProductService(ToysAndGamesContext context, IMapper mapper)
         {
             _context = context;
+            _mapper = mapper;
         }
-        public int AddProduct(ProductDTO productDTO)
+        public async Task AddProduct(ProductAddDTO productDTO)
         {
             //TODO: Change signature to void and throw exception in case the operation failed
-            if (productDTO != null)
+            try
             {
-                Product product = new()
+                if (productDTO is not null)
                 {
-                    Name = productDTO.Name,
-                    Description = productDTO.Description,
-                    AgeRestriction = productDTO.AgeRestriction,
-                    Price = productDTO.Price,
-                    CompanyId = productDTO.CompanyId
-                };
+                    Product product =
+                    // new()
+                    //{
+                    //    Name = productDTO.Name,
+                    //    Description = productDTO.Description,
+                    //    AgeRestriction = productDTO.AgeRestriction,
+                    //    Price = productDTO.Price,
+                    //    CompanyId = productDTO.CompanyId
+                    //};
+                    _mapper.Map<Product>(productDTO);
 
-                _context.Products.Add(product);
-                _context.SaveChanges();
-                return product.ProductId;
+                    await _context.Products.AddAsync(product);
+                    await _context.SaveChangesAsync();
+                }
             }
-            //TODO: Explain this :")
-            return -1;
-        }
-
-        public void DeleteProduct(int id)
-        {
-            Product product = _context.Products.FirstOrDefault(p => p.ProductId == id);
-            if (product != null)
+            catch (Exception)
             {
-                _context.Products.Remove(product);
-                _context.SaveChanges();
+                throw;
             }
         }
 
-        public ProductDTO GetProductById(int id)
+        public async Task DeleteProduct(int id)
         {
-            string path = Path.GetDirectoryName(Assembly.GetCallingAssembly().Location);
-            Product product = _context.Products.Include(c => c.Company).Include(p => p.ProductImages).FirstOrDefault(p => p.ProductId == id);
-            if (product!=null)
+            try
             {
-                List<string> relPaths = ImageUtilities.GetImagePathsFromAssembly(path, product.ProductImages.Select(p => p.ImagePath).ToList());
-                ProductDTO productDTO = new()
+                var product = await _context.Products.FirstOrDefaultAsync(p => p.Id == id);
+                if (product is not null)
                 {
-                    ProductId = product.ProductId,
-                    Name = product.Name,
-                    AgeRestriction = product.AgeRestriction,
-                    Description = product.Description,
-                    Price = product.Price,
-                    CompanyId = product.CompanyId,
-                    CompanyName = product.Company.Name
-                };
-                return productDTO; 
+                    _context.Products.Remove(product);
+                    await _context.SaveChangesAsync();
+                }
             }
-            return null;
-        }
-
-        public IList<ProductDTO> GetProducts()
-        {
-            List<ProductDTO> products = new();
-            _context.Products.Include(c => c.Company).ToList().ForEach(p => products.Add(new()
+            catch (Exception)
             {
-                ProductId = p.ProductId,
-                Name = p.Name,
-                AgeRestriction = p.AgeRestriction,
-                Price = p.Price,
-                CompanyName = p.Company.Name
-            }));
-            return products;
-        }
-
-        public void UpdateProduct(int id, ProductDTO productDTO)
-        {
-            Product product = _context.Products.FirstOrDefault(p => p.ProductId == id);
-
-            if (product != null)
-            {
-                product.Name = productDTO.Name;
-                product.Description = productDTO.Description;
-                product.AgeRestriction = productDTO.AgeRestriction;
-                product.Price = productDTO.Price;
-                product.CompanyId = productDTO.CompanyId;
-
-                _context.Products.Update(product);
-
-                _context.SaveChanges();
+                throw;
             }
         }
 
-        public bool ProductExists(int id)
+        public async Task<ProductDTO?> GetProductById(int id)
         {
-            var product = _context.Products.FirstOrDefault(p => p.ProductId == id);
+            try
+            {
+                string? path = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
+                var product = await _context.Products.Include(c => c.Company)
+                    .Include(p => p.ProductImages).FirstOrDefaultAsync(p => p.Id == id);
 
-            return product != null;
+                if (product is not null && path is not null)
+                {
+                    List<string> relPaths = ImageUtilities.GetImagePathsFromAssembly(path, product.ProductImages.Select(p => p.ImagePath).ToList());
+                    ProductDTO productDTO = _mapper.Map<ProductDTO>(product);
+                    //    new()
+                    //{
+                    //    Id = product.Id,
+                    //    Name = product.Name,
+                    //    AgeRestriction = product.AgeRestriction,
+                    //    Description = product.Description,
+                    //    Price = product.Price,
+                    //    CompanyId = product.CompanyId,
+                    //    CompanyName = product.Company.Name
+                    //};
+                    return productDTO;
+                }
+                return null;
+            }
+            catch (Exception)
+            {
+                return null;
+            }
+        }
+
+        public async Task<IList<ProductDTO>> GetProducts()
+        {
+            List<ProductDTO> productsDto = new();
+            try
+            {
+                var products = await _context.Products.Include(c => c.Company).ToListAsync();
+                products.ForEach(p => productsDto.Add( _mapper.Map<ProductDTO>(p)
+                //    new()
+                //{
+                //    Id = p.Id,
+                //    Name = p.Name,
+                //    AgeRestriction = p.AgeRestriction,
+                //    Price = p.Price,
+                //    CompanyName = p.Company.Name
+                //}
+                    ));
+                return productsDto;
+            }
+            catch (Exception)
+            {
+                return productsDto;
+            }
+        }
+
+        public async Task UpdateProduct(int id, ProductDTO productDTO)
+        {
+            try
+            {
+                var product = await _context.Products.FirstOrDefaultAsync(p => p.Id == id);
+
+                if (product is not null)
+                {
+                    product.Name = productDTO.Name;
+                    product.Description = productDTO.Description;
+                    product.AgeRestriction = productDTO.AgeRestriction;
+                    product.Price = productDTO.Price;
+                    product.CompanyId = productDTO.CompanyId;
+
+                    _context.Products.Update(product);
+
+                    await _context.SaveChangesAsync();
+                }
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
+        public async Task<bool> ProductExists(int id)
+        {
+            try
+            {
+                var product = await _context.Products.FirstOrDefaultAsync(p => p.Id == id);
+
+                return product is not null;
+            }
+            catch (Exception)
+            {
+                return false;
+            }
         }
     }
 }

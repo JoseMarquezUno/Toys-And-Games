@@ -10,22 +10,17 @@ namespace ToysAndGames.Models
 {
     public class Product
     {
-        public int ProductId { get; set; }
-        [MaxLength(50)]
+        public int Id { get; set; }
         public string Name { get; set; }
-        [MaxLength(100)]
         public string? Description { get; set; }
-        [Range(0,100)]
         public int? AgeRestriction { get; set; }
-        public int CompanyId { get; set; }
-        
-        [Range(1.00,1000.00)]
         public decimal Price { get; set; }
 
         //TODO: Use IList<T> Instead of ICollection:
         //https://www.c-sharpcorner.com/UploadFile/78607b/difference-between-ienumerable-icollection-and-ilist-interf/
         //Navigation Properties
-        public ICollection<ProductImage> ProductImages { get; set; }
+        public IList<ProductImage> ProductImages { get; set; }
+        public int CompanyId { get; set; }
         public Company Company { get; set; }
     }
 }

@@ -1,6 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using ToysAndGames.Models.DTO;
 using ToysAndGames.Services.Contracts;
+using WebAPI.DTO;
 
 namespace WebAPI.Controllers
 {
@@ -14,53 +14,65 @@ namespace WebAPI.Controllers
             _productService = productService;
         }
         [HttpGet]
-        public IList<ProductDTO> GetProducts()
+        public async Task<ActionResult<IList<ProductDTO>>> GetProducts()
         {
-            return _productService.GetProducts();
+            return Ok(await _productService.GetProducts());
         }
 
         [HttpGet]
         [Route("Product/{id}")]
-        public ProductDTO GetProduct(int id)
+        public async Task<ActionResult<ProductDTO?>> GetProduct(int id)
         {
-            return _productService.GetProductById(id);
+            return Ok(await _productService.GetProductById(id));
         }
 
         [HttpPut]
         [Route("Product/{id}")]
-        public IActionResult UpdateProduct(int id, ProductDTO productDTO)
+        public async Task<ActionResult> UpdateProduct(int id, ProductDTO productDTO)
         {
-            if (_productService.ProductExists(id))
+            try
             {
-                _productService.UpdateProduct(id, productDTO);
+                if (await _productService.ProductExists(id))
+                {
+                    await _productService.UpdateProduct(id, productDTO);
+                    return Ok(productDTO);
+                }
+                    return NotFound();
             }
-            else
+            catch (Exception)
             {
-                return NotFound();
+                return StatusCode(StatusCodes.Status500InternalServerError);
             }
-            return Ok(productDTO);
         }
 
         [HttpPost]
         [Route("Product")]
-        public IActionResult AddProduct(ProductDTO productDTO)
+        public async Task<ActionResult> AddProduct(ProductAddDTO productDTO)
         {
-            int id = _productService.AddProduct(productDTO);
-            //TODO: By naming convention these calls should be single lined, if its an object creation its ok to have it multiline
-            return CreatedAtAction(nameof(GetProduct), new { id }, productDTO);
+            try
+            {
+                await _productService.AddProduct(productDTO);
+                //TODO: By naming convention these calls should be single lined, if its an object creation its ok to have it multiline
+                return Ok();
+            }
+            catch (Exception)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError);
+            }
         }
 
         [HttpDelete]
         [Route("Product/{id}")]
-        public IActionResult DeleteProduct(int id)
+        public async Task<ActionResult> DeleteProduct(int id)
         {
             try
             {
-                if (_productService.ProductExists(id))
+                if (await _productService.ProductExists(id))
                 {
-                    _productService.DeleteProduct(id);
+                    await _productService.DeleteProduct(id);
+                    return NoContent();
                 }
-                return NotFound($"Id: {id} was not found in the database");
+                return NotFound($"Product with Id: {id} was not found in the database");
 
             }
             catch (Exception ex)

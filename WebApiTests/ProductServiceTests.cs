@@ -1,4 +1,5 @@
 
+using AutoMapper;
 using Microsoft.EntityFrameworkCore;
 using ToysAndGames.DataAccess;
 using ToysAndGames.Models;
@@ -17,16 +18,16 @@ namespace ToysAndGames.WebApiTests
 
         [Trait("Product", "Interface")]
         [Fact]
-        public void GetProducts_ReturnsProducts()
+        public async void GetProducts_ReturnsProducts()
         {
             //Arrange
             var productsMock = new Mock<IProductService>();
             productsMock.Setup(p => p.GetProducts())
-                .Returns(new List<ProductDTO> { new ProductDTO(),
+                .ReturnsAsync(new List<ProductDTO> { new ProductDTO(),
                 new ProductDTO()});
 
             //Act
-            var result = productsMock.Object.GetProducts();
+            var result = await productsMock.Object.GetProducts();
 
             //Assert
             Assert.NotEmpty(result);
@@ -36,15 +37,15 @@ namespace ToysAndGames.WebApiTests
 
         [Trait("Product", "Interface")]
         [Fact]
-        public void GetProducts_ReturnsEmptyList()
+        public async void GetProducts_ReturnsEmptyList()
         {
             //Arrange
             var productsMock = new Mock<IProductService>();
             productsMock.Setup(p => p.GetProducts())
-                .Returns(new List<ProductDTO>());
+                .ReturnsAsync(new List<ProductDTO>());
 
             //Act
-            var result = productsMock.Object.GetProducts();
+            var result = await productsMock.Object.GetProducts();
 
             //Assert
             Assert.Empty(result);
@@ -54,14 +55,14 @@ namespace ToysAndGames.WebApiTests
         [Trait("Product", "Interface")]
         [Theory]
         [GetProductByIdData]
-        public void GetProductById_ReturnsProduct_IfProductIdExists(int id, bool expected)
+        public async void GetProductById_ReturnsProduct_IfProductIdExists(int id, bool expected)
         {
             //Arrange
             var productsMock = new Mock<IProductService>();
             productsMock.Setup(p => p.GetProductById(It.IsInRange<int>(1, 4, Moq.Range.Inclusive)))
-                .Returns(new ProductDTO
+                .ReturnsAsync(new ProductDTO
                 {
-                    ProductId = id,
+                    Id = id,
                     Name = "Hot Wheels",
                     Description = "Twin Mill",
                     AgeRestriction = 3,
@@ -71,7 +72,7 @@ namespace ToysAndGames.WebApiTests
                 });
 
             //Act
-            var result = productsMock.Object.GetProductById(id);
+            var result = await productsMock.Object.GetProductById(id);
 
             //Assert
             Assert.Equal(expected, result == null);
@@ -80,12 +81,12 @@ namespace ToysAndGames.WebApiTests
 
         [Trait("Product", "Interface")]
         [Fact]
-        public void AddProduct_ReturnsProductId()
+        public async void AddProduct_AddProductInDB()
         {
             //Arrange
-            ProductDTO productDTO = new()
+            ProductAddDTO productDTO = new()
             {
-                ProductId = 1,
+                Id = 1,
                 Name = "Hot Wheels",
                 Description = null,
                 AgeRestriction = null,
@@ -94,43 +95,63 @@ namespace ToysAndGames.WebApiTests
             };
 
             var productsMock = new Mock<IProductService>();
-            productsMock.Setup(p => p.AddProduct(It.IsAny<ProductDTO>()))
-                .Returns(productDTO.ProductId);
+            productsMock.Setup(p => p.AddProduct(It.IsAny<ProductAddDTO>()))
+                .Returns(Task.CompletedTask);
             //Act
-            var result = productsMock.Object.AddProduct(productDTO);
+            await productsMock.Object.AddProduct(productDTO);
 
             //Assert
-            Assert.IsType<int>(result);
-            _outputHelper.WriteLine($"ProductId returned: {result.ToString()}");
+            productsMock.Verify(p => p.AddProduct(It.IsAny<ProductAddDTO>()), Times.Once);
+            _outputHelper.WriteLine("The method AddProduct executed once");
+        }
+
+        //TODO: Check if the test is correct
+        [Trait("Product", "Interface")]
+        [Fact]
+        public void AddProduct_ThrowsException()
+        {
+            //Arrange
+            ProductAddDTO? productDTO = null;
+
+            var productsMock = new Mock<IProductService>();
+            productsMock.Setup(p => p.AddProduct(It.IsAny<ProductAddDTO>()))
+                .ThrowsAsync(new Exception());
+            //Act
+            var response = Assert.ThrowsAsync<OperationCanceledException>(()=>productsMock.Object.AddProduct(productDTO));
+
+            //Assert
+            productsMock.Verify(p => p.AddProduct(It.IsAny<ProductAddDTO>()), Times.Once);
+            _outputHelper.WriteLine("The method AddProduct executed at least once");
         }
 
         [Trait("Product", "Interface")]
         [Theory]
         [ProductExistsData]
-        public void ProductExists_ReturnsTrueIfProductExists(int productId, bool expected)
+        public async void ProductExists_ReturnsTrueIfProductExists(int productId, bool expected)
         {
             //Arrange
             var productsMock = new Mock<IProductService>();
             productsMock
                 .Setup(p => p.ProductExists(It.IsInRange<int>(1, 4, Moq.Range.Inclusive)))
-                .Returns(true);
+                .ReturnsAsync(true);
 
             //Act
-            var result = productsMock.Object.ProductExists(productId);
+            var result = await productsMock.Object.ProductExists(productId);
 
             //Assert
             Assert.Equal(expected, result);
             _outputHelper.WriteLine(result.ToString());
         }
 
+        //TODO: Make async operations work in mock
         [Trait("Product", "Context")]
         [Fact]
-        public void UpdateProduct_GivenExistingProduct_UpdatesProduct_UsingContext()
+        public async void UpdateProduct_GivenExistingProduct_UpdatesProduct_UsingContext()
         {
             //Arrange
             var productDTO = new ProductDTO
             {
-                ProductId = 1,
+                Id = 1,
                 Name = "Name1",
                 AgeRestriction = 55,
                 Description = "Desc",
@@ -139,41 +160,44 @@ namespace ToysAndGames.WebApiTests
             };
 
 
-            var productsMockSet = DbSetMockUtility.GetQueryableMock(new Product
+            var productsMockSet = DbSetMockUtility.GetQueryableMock(new List<Product> {new Product
             {
-                ProductId = 1,
+                Id = 1,
                 Name = "Name",
                 AgeRestriction = null,
                 Description = null,
                 CompanyId = 1,
                 Price = 100
-            });
+            } });
 
             var productMockContext = new Mock<ToysAndGamesContext>();
             productMockContext.Setup(m => m.Products).Returns(productsMockSet.Object);
 
-            ProductService productService = new ProductService(productMockContext.Object);
+            var mapperMock = new Mock<IMapper>();
+
+            ProductService productService = new (productMockContext.Object,mapperMock.Object);
 
             //Act
-            productService.UpdateProduct(productDTO.ProductId, productDTO);
-            var result = productMockContext.Object.Products.FirstOrDefault(p => p.ProductId == productDTO.ProductId);
+            await productService.UpdateProduct(productDTO.Id, productDTO);
+            var result = productMockContext.Object.Products.FirstOrDefault(p => p.Id == productDTO.Id);
 
             //Assert
             productsMockSet.Verify(p => p.Update(It.IsAny<Product>()), Times.Once);
-            productMockContext.Verify(p => p.SaveChanges(), Times.Once);
+            productMockContext.Verify(p => p.SaveChangesAsync(CancellationToken.None), Times.Once);
 
             _outputHelper.WriteLine($"ProductDTO with updated fields: {JsonConvert.SerializeObject(productDTO)}");
             _outputHelper.WriteLine($"Product after update: {JsonConvert.SerializeObject(result)}");
         }
 
+        //TODO: Make async operations work in mock
         [Trait("Product", "Context")]
         [Fact]
-        public void UpdateProduct_GivenNoExistingProduct_DoesNotExecuteContextMethods_UsingContext()
+        public async void UpdateProduct_GivenNoExistingProduct_DoesNotExecuteContextMethods_UsingContext()
         {
             //Arrange
             var productDTO = new ProductDTO
             {
-                ProductId = 10,
+                Id = 10,
                 Name = "Name1",
                 AgeRestriction = 55,
                 Description = "Desc",
@@ -182,24 +206,26 @@ namespace ToysAndGames.WebApiTests
             };
 
 
-            var productsMockSet = DbSetMockUtility.GetQueryableMock(new Product
+            var productsMockSet = DbSetMockUtility.GetQueryableMock(new List<Product> {new Product
             {
-                ProductId = 1,
+                Id = 1,
                 Name = "Name",
                 AgeRestriction = null,
                 Description = null,
                 CompanyId = 1,
                 Price = 100
-            });
+            } });
 
             var productMockContext = new Mock<ToysAndGamesContext>();
             productMockContext.Setup(m => m.Products).Returns(productsMockSet.Object);
 
-            ProductService productService = new ProductService(productMockContext.Object);
+            var mapperMock = new Mock<IMapper>();
+
+            ProductService productService = new (productMockContext.Object,mapperMock.Object);
 
             //Act
-            productService.UpdateProduct(productDTO.ProductId, productDTO);
-            var result = productMockContext.Object.Products.FirstOrDefault(p => p.ProductId == productDTO.ProductId);
+            await productService.UpdateProduct(productDTO.Id, productDTO);
+            var result = productMockContext.Object.Products.FirstOrDefault(p => p.Id == productDTO.Id);
 
             //Assert
             Assert.Null(result);
@@ -212,12 +238,12 @@ namespace ToysAndGames.WebApiTests
 
         [Trait("Product", "Context")]
         [Fact]
-        public void AddProduct_GivenProductDto_ReturnsIntId_UsingContext()
+        public async void AddProduct_GivenProductDto_AddsProduct_UsingContext()
         {
             //Arrange
-            var productDTO = new ProductDTO
+            var productDTO = new ProductAddDTO
             {
-                ProductId = 1,
+                Id = 1,
                 Name = "Name1",
                 AgeRestriction = 55,
                 Description = "Desc",
@@ -231,70 +257,76 @@ namespace ToysAndGames.WebApiTests
             var productMockContext = new Mock<ToysAndGamesContext>();
             productMockContext.Setup(m => m.Products).Returns(productsMockSet.Object);
 
-            ProductService productService = new ProductService(productMockContext.Object);
+            var mapperMock = new Mock<IMapper>();
+
+            ProductService productService = new (productMockContext.Object, mapperMock.Object);
 
             //Act
-            var result = productService.AddProduct(productDTO);
+            await productService.AddProduct(productDTO);
 
             //Assert
-            Assert.IsType<int>(result);
-            productsMockSet.Verify(p => p.Add(It.IsAny<Product>()), Times.Once);
-            productMockContext.Verify(p => p.SaveChanges(), Times.Once);
+            productsMockSet.Verify(p => p.AddAsync(It.IsAny<Product>(), CancellationToken.None), Times.Once);
+            productMockContext.Verify(p => p.SaveChangesAsync(CancellationToken.None), Times.Once);
 
-            _outputHelper.WriteLine($"ProductId added: {result}");
+            _outputHelper.WriteLine("Add and SaveChanges executed once from Context");
         }
 
 
         [Trait("Product", "Context")]
         [Fact]
-        public void AddProduct_GivenNullOLbject_ReturnsIdMinus1_UsingContext()
+        public async void AddProduct_GivenNullOLbject_ThrowsException_UsingContext()
         {
             //Arrange
-            ProductDTO productDTO = null;
+            ProductAddDTO productDTO = null;
 
             var productsMockSet = new Mock<DbSet<Product>>();
 
             var productMockContext = new Mock<ToysAndGamesContext>();
             productMockContext.Setup(m => m.Products).Returns(productsMockSet.Object);
 
-            ProductService productService = new ProductService(productMockContext.Object);
+            var mapperMock = new Mock<IMapper>();
+
+            ProductService productService = new (productMockContext.Object, mapperMock.Object);
 
             //Act
-            var result = productService.AddProduct(productDTO);
+            var result = Assert.ThrowsAsync<OperationCanceledException> (()=>productService.AddProduct(productDTO));
 
             //Assert
-            Assert.Equal(-1, result);
+            Assert.NotNull(result);
             productsMockSet.Verify(p => p.Add(It.IsAny<Product>()), Times.Never);
             productMockContext.Verify(p => p.SaveChanges(), Times.Never);
 
-            _outputHelper.WriteLine($"ProductId added: {result}");
+            _outputHelper.WriteLine($"Exception thrown: {result.Exception.Message}");
         }
 
+        //TODO: Make async operations work in mock
         [Trait("Product", "Context")]
         [Fact]
-        public void DeleteProduct_RemovesProduct_UsingContext()
+        public async void DeleteProduct_RemovesProduct_UsingContext()
         {
             //Arrange
             var productId = 1;
 
 
-            var productsMockSet = DbSetMockUtility.GetQueryableMock(new Product
+            var productsMockSet = DbSetMockUtility.GetQueryableMock(new List<Product> {new Product
             {
-                ProductId = 1,
+                Id = 1,
                 Name = "Name",
                 AgeRestriction = null,
                 Description = null,
                 CompanyId = 1,
                 Price = 100
-            });
+            } });
 
             var productMockContext = new Mock<ToysAndGamesContext>();
             productMockContext.Setup(m => m.Products).Returns(productsMockSet.Object);
 
-            ProductService productService = new ProductService(productMockContext.Object);
+            var mapperMock = new Mock<IMapper>();
+
+            ProductService productService = new (productMockContext.Object,mapperMock.Object);
 
             //Act
-            productService.DeleteProduct(productId);
+            await productService.DeleteProduct(productId);
 
             //Assert
             productsMockSet.Verify(p => p.Remove(It.IsAny<Product>()), Times.Once);
@@ -303,31 +335,34 @@ namespace ToysAndGames.WebApiTests
             _outputHelper.WriteLine($"ProductId deleted: {productId}");
         }
 
+        //TODO: Make async operations work in mock
         [Trait("Product", "Context")]
         [Fact]
-        public void DeleteProduct_GivenNoExistingProduct_DoesNotRemovesProduct_UsingContext()
+        public async void DeleteProduct_GivenNoExistingProduct_DoesNotRemovesProduct_UsingContext()
         {
             //Arrange
             var productId = 10;
 
 
-            var productsMockSet = DbSetMockUtility.GetQueryableMock(new Product
+            var productsMockSet = DbSetMockUtility.GetQueryableMock(new List<Product> {new Product
             {
-                ProductId = 1,
+                Id = 1,
                 Name = "Name",
                 AgeRestriction = null,
                 Description = null,
                 CompanyId = 1,
                 Price = 100
-            });
+            }});
 
             var productMockContext = new Mock<ToysAndGamesContext>();
             productMockContext.Setup(m => m.Products).Returns(productsMockSet.Object);
 
-            ProductService productService = new ProductService(productMockContext.Object);
+            var mapperMock = new Mock<IMapper>();
+
+            ProductService productService = new (productMockContext.Object, mapperMock.Object);
 
             //Act
-            productService.DeleteProduct(productId);
+            await productService.DeleteProduct(productId);
 
             //Assert
             productsMockSet.Verify(p => p.Remove(It.IsAny<Product>()), Times.Never);

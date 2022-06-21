@@ -34,10 +34,9 @@ namespace ToysAndGames.DataAccess
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
-            modelBuilder.Entity<Product>().Property(p => p.Price).HasColumnType("Money");
-            modelBuilder.ApplyConfiguration(new CompaniesDataSeed());
-            modelBuilder.ApplyConfiguration(new ProductsDataSeed());
-            modelBuilder.ApplyConfiguration(new ProductImagesDataSeed());
+            modelBuilder.ApplyConfiguration(new CompaniesConfiguration());
+            modelBuilder.ApplyConfiguration(new ProductsConfiguration());
+            modelBuilder.ApplyConfiguration(new ProductImagesConfiguration());
         }
     }
 }

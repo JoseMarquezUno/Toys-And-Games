@@ -10,9 +10,10 @@ namespace ToysAndGames.Models
 {
     public class ProductImage
     {
-        public int ProductImageId { get; set; }
-        [Required]
+        public int Id { get; set; }
         public string ImagePath { get; set; }
+
+        //Navigation Properties
         public int? ProductId { get; set; }
         public Product Product { get; set; }
     }

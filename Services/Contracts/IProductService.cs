@@ -4,17 +4,17 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using ToysAndGames.Models;
-using ToysAndGames.Models.DTO;
+using WebAPI.DTO;
 
 namespace ToysAndGames.Services.Contracts
 {
     public interface IProductService
     {
-        IList<ProductDTO> GetProducts();
-        ProductDTO GetProductById(int id);
-        int AddProduct(ProductDTO productDTO);
-        void UpdateProduct(int id, ProductDTO productDTO);
-        void DeleteProduct(int id);
-        bool ProductExists(int id);
+        Task<IList<ProductDTO>> GetProducts();
+        Task<ProductDTO?> GetProductById(int id);
+        Task AddProduct(ProductAddDTO productDTO);
+        Task UpdateProduct(int id, ProductDTO productDTO);
+        Task DeleteProduct(int id);
+        Task<bool> ProductExists(int id);
     }
 }

@@ -37,9 +37,9 @@ namespace WebApiTests
             var httpContent = new StringContent(jsonObject,Encoding.UTF8,"application/json");
 
             //Act
-            var productImagesResponseBeforeAddition = await client.GetAsync("/api/ProductImages/" + productId);
+            var productImagesResponseBeforeAddition = await client.GetAsync($"/api/ProductImages/{productId}");
             var response =  await client.PostAsync("/api/ProductImages/Product/1", httpContent);
-            var productImagesResponse = await client.GetAsync("/api/ProductImages/"+productId);
+            var productImagesResponse = await client.GetAsync($"/api/ProductImages/{productId}");
 
             //Assert
             productImagesResponseBeforeAddition.EnsureSuccessStatusCode();
@@ -68,20 +68,21 @@ namespace WebApiTests
             var client = _factory.CreateDefaultClient();
 
             var productId = 1;
-            var responseGetProductImages = await client.GetAsync("/api/ProductImages/" + productId);
+            var responseGetProductImages = await client.GetAsync($"/api/ProductImages/{productId}");
+            var images = JsonConvert.DeserializeObject<List<ProductImageDTO>>(responseGetProductImages.Content.ReadAsStringAsync().Result);
             var imageToBeDeleted = JsonConvert.DeserializeObject<List<ProductImageDTO>>(responseGetProductImages.Content.ReadAsStringAsync().Result).Last();
             //Act
-            var response = await client.DeleteAsync("/api/ProductImages/ProductImage/" + imageToBeDeleted.ProductImageId);
-            var responseGetProductImagesAfterDeletion = await client.GetAsync("/api/ProductImages/" + productId);
+            var response = await client.DeleteAsync($"/api/ProductImages/ProductImage/{imageToBeDeleted.Id}");
+            var responseGetProductImagesAfterDeletion = await client.GetAsync($"/api/ProductImages/{productId}");
 
             //Assert
             var imagesAfterDeletion = JsonConvert.DeserializeObject<List<ProductImageDTO>>(responseGetProductImagesAfterDeletion.Content.ReadAsStringAsync().Result);
             var imagesBeforeDeletion = JsonConvert.DeserializeObject<List<ProductImageDTO>>(responseGetProductImages.Content.ReadAsStringAsync().Result);
             var imagesAfterDeletionCount = imagesAfterDeletion.Count;
             var imagesBeforeDeletionCount = imagesBeforeDeletion.Count;
-            _outputHelper.WriteLine($"Images before deletion: {JsonConvert.SerializeObject(imagesBeforeDeletion.Select(i => new {i.ProductImageId,i.Name}))}");
-            _outputHelper.WriteLine($"Image to be deleted: {JsonConvert.SerializeObject(new { imageToBeDeleted.ProductImageId,imageToBeDeleted.Name})}");
-            _outputHelper.WriteLine($"Images after deletion: {JsonConvert.SerializeObject(imagesAfterDeletion.Select(i => new {i.ProductImageId,i.Name}))}");
+            _outputHelper.WriteLine($"Images before deletion: {JsonConvert.SerializeObject(imagesBeforeDeletion.Select(i => new {i.Id,i.Name}))}");
+            _outputHelper.WriteLine($"Image to be deleted: {JsonConvert.SerializeObject(new { imageToBeDeleted.Id,imageToBeDeleted.Name})}");
+            _outputHelper.WriteLine($"Images after deletion: {JsonConvert.SerializeObject(imagesAfterDeletion.Select(i => new {i.Id,i.Name}))}");
             Assert.DoesNotContain(imagesAfterDeletion, i => i == imageToBeDeleted);
             Assert.NotEqual(imagesBeforeDeletionCount, imagesAfterDeletionCount);
         }

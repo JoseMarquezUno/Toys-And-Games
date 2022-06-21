@@ -1,4 +1,5 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using AutoMapper;
+using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -6,47 +7,69 @@ using System.Text;
 using System.Threading.Tasks;
 using ToysAndGames.DataAccess;
 using ToysAndGames.Models;
-using ToysAndGames.Models.DTO;
 using ToysAndGames.Services.Contracts;
+using WebAPI.DTO;
 
 namespace ToysAndGames.Services.Services
 {
     public class CompanyService : ICompanyService
     {
         private readonly ToysAndGamesContext _context;
-        public CompanyService(ToysAndGamesContext context)
+        private readonly IMapper _mapper;
+        public CompanyService(ToysAndGamesContext context, IMapper mapper)
         {
             _context = context;
+            _mapper = mapper;
         }
-        public int AddCompany(CompanyDTO companyDTO)
+        public async Task AddCompany(CompanyDTO companyDTO)
         {
-            if (companyDTO != null)
+            try
             {
-                Company company = new Company()
+                if (companyDTO is not null)
                 {
-                    Name = companyDTO.Name
-                };
-                _context.Companies.Add(company);
-                _context.SaveChanges();
-                return company.CompanyId;
+                    Company company = _mapper.Map<Company>(companyDTO);
+                    //    new ()
+                    //{
+                    //    Name = companyDTO.Name
+                    //};
+                    await _context.Companies.AddAsync(company);
+                    await _context.SaveChangesAsync();
+                }
             }
-            return -1;
-        }
-
-        public bool CompanyExists(int id)
-        {
-            var company = _context.Companies.FirstOrDefault(c => c.CompanyId == id);
-            return company != null;
-        }
-
-        public void DeleteCompany(int id)
-        {
-            Company company = _context.Companies.FirstOrDefault(c => c.CompanyId == id);
-            //TODO: As a recomendation start using the new "is/isnot" conventions which is more readable
-            if (company is not null)
+            catch (Exception)
             {
-                _context.Companies.Remove(company);
-                _context.SaveChanges();
+                throw;
+            }
+        }
+
+        public async Task<bool> CompanyExists(int id)
+        {
+            try
+            {
+                var company = await _context.Companies.FirstOrDefaultAsync(c => c.Id == id);
+                return company is not null;
+            }
+            catch (Exception)
+            {
+                return false;
+            }
+        }
+
+        public async Task DeleteCompany(int id)
+        {
+            try
+            {
+                var company = await _context.Companies.FirstOrDefaultAsync(c => c.Id == id);
+                //TODO: As a recomendation start using the new "is/isnot" conventions which is more readable
+                if (company is not null)
+                {
+                    _context.Companies.Remove(company);
+                    await _context.SaveChangesAsync();
+                }
+            }
+            catch (Exception)
+            {
+                throw;
             }
         }
 
@@ -54,23 +77,33 @@ namespace ToysAndGames.Services.Services
         {
             //TODO: Use automapper instead of the manual conversion
             //Kudos for the empty new() declaration! :) 
-            var companies = await _context.Companies.ToListAsync();
             List<CompanyDTO> companiesDtos = new();
-            companies.ForEach(c => companiesDtos.Add(new CompanyDTO { CompanyId = c.CompanyId, Name = c.Name }));
-            return companiesDtos;
+            try
+            {
+                var companies = await _context.Companies.ToListAsync();
+                companies.ForEach(c => companiesDtos.Add(_mapper.Map<CompanyDTO>(c)
+                    //new () { Id = c.Id, Name = c.Name }
+                    ));
+                return companiesDtos;
+            }
+            catch (Exception)
+            {
+                return companiesDtos;
+            }
         }
 
-        public CompanyDTO? GetCompanyById(int id)
+        public async Task<CompanyDTO?> GetCompanyById(int id)
         {
             try
             {
                 //TODO: How are you handling exceptions?
-                Company company = _context.Companies.First(c => c.CompanyId == id);
-                CompanyDTO companyDTO = new() 
-                {
-                    Name= company.Name,
-                    CompanyId = company.CompanyId
-                };
+                var company = await _context.Companies.FirstOrDefaultAsync(c => c.Id == id);
+                CompanyDTO companyDTO = _mapper.Map<CompanyDTO?>(company);
+                //    new()
+                //{
+                //    Name = company.Name,
+                //    Id = company.Id
+                //};
                 return companyDTO;
             }
             catch (Exception)
@@ -79,18 +112,25 @@ namespace ToysAndGames.Services.Services
                 return null;
             }
         }
-        
 
-        public void UpdateCompany(int id, CompanyDTO companyDTO)
+
+        public async Task UpdateCompany(int id, CompanyDTO companyDTO)
         {
             //TODO: This is not wrong, but usually people use var when getting Queryes, because you could have an IQueryable
-            Company company = _context.Companies.FirstOrDefault(c => c.CompanyId == id);
-            if (company != null)
+            try
             {
-                company.Name = companyDTO.Name;
+                var company = await _context.Companies.FirstOrDefaultAsync(c => c.Id == id);
+                if (company is not null)
+                {
+                    company.Name = companyDTO.Name;
 
-                _context.Companies.Update(company);
-                _context.SaveChanges();
+                    _context.Companies.Update(company);
+                    await _context.SaveChangesAsync();
+                }
+            }
+            catch (Exception)
+            {
+                throw;
             }
         }
     }

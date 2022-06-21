@@ -3,14 +3,15 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using ToysAndGames.Models.DTO;
+using WebAPI.DTO;
 
 namespace ToysAndGames.Services.Contracts
 {
     public interface IProductImageService
     {
-        void AddProductImage(IList<ProductImageDTO> productImages, int productId);
-        void DeleteProductImage(int productImageId);
-        IList<ProductImageDTO> GetProductImages(int productId);
+        Task AddProductImage(IList<ProductImageDTO> productImages, int productId);
+        Task DeleteProductImage(int productImageId);
+        Task<IList<ProductImageDTO>> GetProductImages(int productId);
+        Task<bool> ProductImageExists(int id);
     }
 }

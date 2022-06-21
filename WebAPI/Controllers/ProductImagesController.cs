@@ -1,6 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using ToysAndGames.Models.DTO;
 using ToysAndGames.Services.Contracts;
+using WebAPI.DTO;
 
 namespace WebAPI.Controllers
 {
@@ -16,29 +16,47 @@ namespace WebAPI.Controllers
 
         [HttpGet]
         [Route("{productId}")]
-        public IList<ProductImageDTO> GetProductImages(int productId)
+        public async Task<ActionResult<IList<ProductImageDTO>>> GetProductImages(int productId)
         {
-            return _imageService.GetProductImages(productId);
+            return Ok(await _imageService.GetProductImages(productId));
         }
 
         [HttpPost]
         [Route("Product/{id}")]
-        public IActionResult AddProductImages(int id, List<ProductImageDTO> productImages)
+        public async Task<ActionResult> AddProductImages(int id, List<ProductImageDTO> productImages)
         {
-            if (productImages.Count<1)
+            try
             {
-                return BadRequest();
+                if (productImages.Count < 1)
+                {
+                    return BadRequest();
+                }
+                await _imageService.AddProductImage(productImages, id);
+                return Ok();
             }
-            _imageService.AddProductImage(productImages, id);
-            return Ok();
+            catch (Exception)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError);
+            }
         }
 
         [HttpDelete]
         [Route("ProductImage/{id}")]
-        public IActionResult DeleteProductImage(int id)
+        public async Task<ActionResult> DeleteProductImage(int id)
         {
-            _imageService.DeleteProductImage(id);
-            return NoContent();
+            try
+            {
+                if (await _imageService.ProductImageExists(id))
+                {
+                    await _imageService.DeleteProductImage(id);
+                    return NoContent(); 
+                }
+                return NotFound($"ProducImage with Id: {id} was not found in database");
+            }
+            catch (Exception)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError);
+            }
         }
     }
 }

@@ -16,7 +16,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\Models\ToysAndGames.Models.csproj" />
+    <ProjectReference Include="..\Models\WebAPI.DTO.csproj" />
   </ItemGroup>
 
 </Project>

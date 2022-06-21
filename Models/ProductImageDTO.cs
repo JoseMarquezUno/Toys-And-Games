@@ -4,11 +4,12 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace ToysAndGames.Models.DTO
+namespace WebAPI.DTO
 {
-    public class CompanyDTO
+    public class ProductImageDTO
     {
-        public int CompanyId { get; set; }
+        public int? Id { get; set; }
+        public string ImageBase64 { get; set; }
         public string? Name { get; set; }
     }
 }

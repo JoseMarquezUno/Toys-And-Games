@@ -2,10 +2,12 @@ using Microsoft.EntityFrameworkCore;
 using ToysAndGames.DataAccess;
 using ToysAndGames.Services.Contracts;
 using ToysAndGames.Services.Services;
+using WebAPI.Services.Mapper;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
+builder.Services.AddAutoMapper(typeof(Program).Assembly, typeof(MapperConfiguration).Assembly);
 
 builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle

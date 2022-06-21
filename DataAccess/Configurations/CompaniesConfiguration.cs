@@ -9,7 +9,7 @@ using ToysAndGames.Models;
 
 namespace ToysAndGames.DataAccess.Configurations
 {
-    public class CompaniesDataSeed : IEntityTypeConfiguration<Company>
+    public class CompaniesConfiguration : IEntityTypeConfiguration<Company>
     {
 
         
@@ -20,9 +20,9 @@ namespace ToysAndGames.DataAccess.Configurations
         {
             builder.Property(x => x.Name).HasMaxLength(50);
 
-            builder.HasData(new { CompanyId = 1, Name = "Mattel" },
-                new { CompanyId = 2, Name = "Hasbro"},
-                new { CompanyId = 3, Name = "Mi Alegria" });
+            builder.HasData(new Company { Id = 1, Name = "Mattel" },
+                new Company { Id = 2, Name = "Hasbro"},
+                new Company { Id = 3, Name = "Mi Alegria" });
         }
     }
 }

@@ -1,6 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using ToysAndGames.Models.DTO;
 using ToysAndGames.Services.Contracts;
+using WebAPI.DTO;
 
 namespace WebAPI.Controllers
 {
@@ -17,51 +17,65 @@ namespace WebAPI.Controllers
         public async Task<ActionResult<IList<CompanyDTO>>> GetCompanies()
         {
             //TODO: as a good practice use non-blocking/waiting code blocks in other words async/await calls to the controllers/services
-            return Ok(_companyService.GetCompanies());
+            return Ok(await _companyService.GetCompanies());
         }
         [HttpGet]
         [Route("Company/{id}")]
-        public IActionResult GetCompany(int id)
+        public async Task<ActionResult<CompanyDTO?>> GetCompany(int id)
         {
-            return Ok(_companyService.GetCompanyById(id));
+            return Ok(await _companyService.GetCompanyById(id));
         }
         [HttpPost]
         [Route("Company")]
-        public IActionResult AddCompany(CompanyDTO company)
+        public async Task<ActionResult> AddCompany(CompanyDTO company)
         {
-            int id = _companyService.AddCompany(company);
-            return CreatedAtAction(nameof(GetCompany),
-                new { id = id },
-                company);
+            try
+            {
+                await _companyService.AddCompany(company);
+                return Ok();
+            }
+            catch (Exception)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError);
+            }
         }
         [HttpPut]
         [Route("Company/{id}")]
-        public IActionResult UpdateCompany(int id, CompanyDTO company)
+        public async Task<ActionResult<CompanyDTO>> UpdateCompany(int id, CompanyDTO company)
         {
-            if (_companyService.CompanyExists(id))
+            try
             {
-                _companyService.UpdateCompany(id, company);
+                if (await _companyService.CompanyExists(id))
+                {
+                    await _companyService.UpdateCompany(id, company);
+                    return Ok(company);
+                }
+                    return NotFound();
             }
-            else
+            catch (Exception)
             {
-                return NotFound();
+                return StatusCode(StatusCodes.Status500InternalServerError);
             }
-            return Ok(company);
         }
 
         [HttpDelete]
         [Route("Company/{id}")]
-        public IActionResult DeleteCompany(int id)
+        public async Task<ActionResult> DeleteCompany(int id)
         {
-            if (_companyService.CompanyExists(id))
+            try
             {
-                _companyService.DeleteCompany(id);
+                if (await _companyService.CompanyExists(id))
+                {
+                    await _companyService.DeleteCompany(id);
+                    return NoContent();
+                }
+                    return NotFound($"Company with Id: {id} was not found in database");
+
             }
-            else
+            catch (Exception)
             {
-                return NotFound();
+                return StatusCode(StatusCodes.Status500InternalServerError);
             }
-            return NoContent();
         }
     }
 }

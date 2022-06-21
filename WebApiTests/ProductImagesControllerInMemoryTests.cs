@@ -34,13 +34,13 @@ namespace WebApiTests
             var httpContent = new StringContent(jsonObject, Encoding.UTF8, "application/json");
 
             //Act
-            var productImagesBeforeAdd = await _client.GetAsync("/api/ProductImages/" + productId);
-            var response = await _client.PostAsync("/api/ProductImages/Product/1", httpContent);
-            var productImagesAfterAdd = await _client.GetAsync("/api/ProductImages/" + productId);
+            var productImagesBeforeAdd = await _client.GetAsync($"/api/ProductImages/{productId}");
+            var response = await _client.PostAsync($"/api/ProductImages/Product/{productId}", httpContent);
+            var productImagesAfterAdd = await _client.GetAsync($"/api/ProductImages/{productId}");
             var productImagesContentAfterAdd = JsonConvert.DeserializeObject<List<ProductImageDTO>>(productImagesAfterAdd.Content.ReadAsStringAsync().Result);
             var imageToBeDeleted = productImagesContentAfterAdd.LastOrDefault();
-            var deletionResponse = await _client.DeleteAsync("/api/ProductImages/ProductImage/" + imageToBeDeleted.ProductImageId);
-            var productImagesAfterDeletion = await _client.GetAsync("/api/ProductImages/" + productId);
+            var deletionResponse = await _client.DeleteAsync($"/api/ProductImages/ProductImage/{imageToBeDeleted.Id}");
+            var productImagesAfterDeletion = await _client.GetAsync($"/api/ProductImages/{productId}");
 
             //Assert
             productImagesBeforeAdd.EnsureSuccessStatusCode();
@@ -54,10 +54,10 @@ namespace WebApiTests
             Assert.NotEqual(productImagesContentBeforeAdd.Count, productImagesContentAfterAdd.Count);
             Assert.DoesNotContain(productImagesContentAfterDeletion, i => i == imageToBeDeleted);
 
-            _outputHelper.WriteLine($"Product images before add: {JsonConvert.SerializeObject(productImagesContentBeforeAdd.Select(i => new { i.ProductImageId, i.Name }))}");
-            _outputHelper.WriteLine($"Product images after add: {JsonConvert.SerializeObject(productImagesContentAfterAdd.Select(i => new { i.ProductImageId, i.Name }))}");
-            _outputHelper.WriteLine($"Product image to delete: {JsonConvert.SerializeObject(new { imageToBeDeleted.ProductImageId, imageToBeDeleted.Name })}");
-            _outputHelper.WriteLine($"Product images after deletion: {JsonConvert.SerializeObject(productImagesContentAfterDeletion.Select(i => new { i.ProductImageId, i.Name }))}");
+            _outputHelper.WriteLine($"Product images before add: {JsonConvert.SerializeObject(productImagesContentBeforeAdd.Select(i => new { i.Id, i.Name }))}");
+            _outputHelper.WriteLine($"Product images after add: {JsonConvert.SerializeObject(productImagesContentAfterAdd.Select(i => new { i.Id, i.Name }))}");
+            _outputHelper.WriteLine($"Product image to delete: {JsonConvert.SerializeObject(new { imageToBeDeleted.Id, imageToBeDeleted.Name })}");
+            _outputHelper.WriteLine($"Product images after deletion: {JsonConvert.SerializeObject(productImagesContentAfterDeletion.Select(i => new { i.Id, i.Name }))}");
 
         }
     }

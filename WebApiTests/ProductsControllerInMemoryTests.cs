@@ -38,13 +38,14 @@ namespace WebApiTests
             var productsBeforeAddResponse = await _client.GetAsync("/api/Products");
             var productAddResponse = await _client.PostAsync("/api/Products/Product", httpContent);
             var productsAfterAddResponse = await _client.GetAsync("/api/Products");
-            var getAddedProduct = productAddResponse.Headers.Location;
-            var getProductAddedResponse = await _client.GetAsync(getAddedProduct);
+            //var getAddedProduct = productAddResponse.Headers.Location;
+            var productsAfterAdd = JsonConvert.DeserializeObject<List<ProductDTO>>(productsAfterAddResponse.Content.ReadAsStringAsync().Result);
+            var getProductAddedResponse = await _client.GetAsync($"/api/Products/Product/{productsAfterAdd.Last().Id}");
 
             //Assert
             var productsBeforeAdd = JsonConvert.DeserializeObject<List<ProductDTO>>(productsBeforeAddResponse.Content.ReadAsStringAsync().Result);
             var productGet = JsonConvert.DeserializeObject<ProductDTO>(getProductAddedResponse.Content.ReadAsStringAsync().Result);
-            var productsAfterAdd = JsonConvert.DeserializeObject<List<ProductDTO>>(productsAfterAddResponse.Content.ReadAsStringAsync().Result);
+            //var productsAfterAdd = JsonConvert.DeserializeObject<List<ProductDTO>>(productsAfterAddResponse.Content.ReadAsStringAsync().Result);
 
             Assert.NotEqual(productsBeforeAdd.Count,productsAfterAdd.Count);
             Assert.NotNull(productGet);
@@ -66,7 +67,7 @@ namespace WebApiTests
             var productsBeforeDeleteResponse = await _client.GetAsync("/api/Products");
             var productDeleteResponse = await _client.DeleteAsync($"/api/Products/Product/{productId}" );
             var productsAfterDeleteResponse = await _client.GetAsync("/api/Products");
-            var productGetResponse = await _client.GetAsync("/api/Products/Product/" + productId);
+            var productGetResponse = await _client.GetAsync($"/api/Products/Product/{productId}");
 
             //Assert
             var productsBeforeDelete = JsonConvert.DeserializeObject<List<ProductDTO>>(productsBeforeDeleteResponse.Content.ReadAsStringAsync().Result);
@@ -92,7 +93,7 @@ namespace WebApiTests
             //Arrange
             var productId = 1;
 
-            var productResponse = await _client.GetAsync("/api/Products/Product/" + productId);
+            var productResponse = await _client.GetAsync($"/api/Products/Product/{productId}");
             var product = JsonConvert.DeserializeObject<ProductDTO>(productResponse.Content.ReadAsStringAsync().Result);
             product.Description = null;
             product.AgeRestriction = null;
@@ -102,9 +103,9 @@ namespace WebApiTests
             var httpContent = new StringContent(jsonObject,Encoding.UTF8,"application/json");
 
             //Act
-            var productBeforeUpdateResponse = await _client.GetAsync("/api/Products/Product/" + productId);
-            var productUpdateResponse = await _client.PutAsync("/api/Products/Product/" + productId, httpContent);
-            var productAfterUpdateResponse = await _client.GetAsync("api/Products/Product/" + productId);
+            var productBeforeUpdateResponse = await _client.GetAsync($"/api/Products/Product/{productId}");
+            var productUpdateResponse = await _client.PutAsync($"/api/Products/Product/{productId}", httpContent);
+            var productAfterUpdateResponse = await _client.GetAsync($"api/Products/Product/{productId}");
 
             //Assert
             var productBeforeUpdate = JsonConvert.DeserializeObject<ProductDTO>(productBeforeUpdateResponse.Content.ReadAsStringAsync().Result);

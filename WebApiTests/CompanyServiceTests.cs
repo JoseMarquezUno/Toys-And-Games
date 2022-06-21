@@ -1,5 +1,7 @@
 ﻿
+using AutoMapper;
 using Microsoft.EntityFrameworkCore;
+using System.Data.Entity.Infrastructure;
 using ToysAndGames.DataAccess;
 using ToysAndGames.Models;
 using ToysAndGames.Services.Services;
@@ -56,16 +58,16 @@ namespace WebApiTests
         [Trait("Company", "Interface")]
         [Theory]
         [GetCompanyByIdData]
-        public void GetCompanyById_ReturnsCompany_IfCompanyExists(int companyId, bool expected)
+        public async void GetCompanyById_ReturnsCompany_IfCompanyExists(int companyId, bool expected)
         {
             //Arrange
             var companiesMock = new Mock<ICompanyService>();
             companiesMock
                 .Setup(c => c.GetCompanyById(It.IsInRange<int>(1, 3, Moq.Range.Inclusive)))
-                .Returns(new CompanyDTO { CompanyId = companyId});
+                .ReturnsAsync(new CompanyDTO { Id = companyId});
 
             //Act
-            var result = companiesMock.Object.GetCompanyById(companyId);
+            var result = await companiesMock.Object.GetCompanyById(companyId);
 
             //Assert
             Assert.Equal(expected, result == null);
@@ -75,70 +77,73 @@ namespace WebApiTests
 
         [Trait("Company", "Interface")]
         [Fact]
-        public void AddCompany_ReturnsCompanyId()
+        public async void AddCompany_AddsCompanyInDB()
         {
             //Arrange
             CompanyDTO companyDTO = new CompanyDTO()
             {
-                CompanyId = 1,
+                Id = 1,
                 Name = "company"
             };
 
             var companiesMock = new Mock<ICompanyService>();
             companiesMock
                 .Setup(c => c.AddCompany(It.IsAny<CompanyDTO>()))
-                .Returns(companyDTO.CompanyId);
+                .Returns(Task.CompletedTask);
 
             //Act
-            var result = companiesMock.Object.AddCompany(companyDTO);
+            await companiesMock.Object.AddCompany(companyDTO);
 
             //Assert
-            Assert.IsType<int>(result);
-            _outputHelper.WriteLine(result.ToString());
+            companiesMock.Verify(p=>p.AddCompany(It.IsAny<CompanyDTO>()),Times.Once);
+            _outputHelper.WriteLine("The method AddCompany executed once");
         }
 
         [Trait("Company", "Interface")]
         [Theory]
         [CompanyExistsData]
-        public void CompanyExists_ReturnsTrueIfCompanyExists(int companyId, bool expected)
+        public async void CompanyExists_ReturnsTrueIfCompanyExists(int companyId, bool expected)
         {
             //Arrange
             var companiesMock = new Mock<ICompanyService>();
             companiesMock
                 .Setup(c => c.CompanyExists(It.IsInRange<int>(1, 3, Moq.Range.Inclusive)))
-                .Returns(true);
+                .ReturnsAsync(true);
 
             //Act
-            var result = companiesMock.Object.CompanyExists(companyId);
+            var result = await companiesMock.Object.CompanyExists(companyId);
 
             //Assert
             Assert.Equal(expected, result);
             _outputHelper.WriteLine(result.ToString());
         }
 
+        //TODO: Make async operations work in mock
         [Trait("Company","Context")]
         [Fact]
-        public void UpdateCompany_GivenExistingCompany_UpdatesCompany_UsingContext()
+        public async void UpdateCompany_GivenExistingCompany_UpdatesCompany_UsingContext()
         {
             //Arrange
             var companyDTO = new CompanyDTO()
             {
-                CompanyId = 1,
+                Id = 1,
                 Name = "Matel"
             };
 
-            var companiesMockSet = DbSetMockUtility.GetQueryableMock(new Company { CompanyId = 1, Name = "Mattel" });
+            var companiesMockSet = DbSetMockUtility.GetQueryableMock(new List<Company> { new Company { Id = 1, Name = "Mattel" } });
 
             var mockContext = new Mock<ToysAndGamesContext>();
             mockContext.Setup(m => m.Companies).Returns(companiesMockSet.Object);
 
+            var mapperMock = new Mock<IMapper>();
+
             _outputHelper.WriteLine($"Company in mock context: {JsonConvert.SerializeObject(companiesMockSet.Object.First())}");
 
-            CompanyService companyService = new CompanyService(mockContext.Object);
+            CompanyService companyService = new (mockContext.Object,mapperMock.Object);
 
             //Act
-            companyService.UpdateCompany(companyDTO.CompanyId, companyDTO);
-            var result = mockContext.Object.Companies.FirstOrDefault(c => c.CompanyId == companyDTO.CompanyId);
+            await companyService.UpdateCompany(companyDTO.Id, companyDTO);
+            var result = mockContext.Object.Companies.FirstOrDefault(c => c.Id == companyDTO.Id);
 
             //Assert
             Assert.Equal(companyDTO.Name, result.Name);
@@ -148,27 +153,30 @@ namespace WebApiTests
             _outputHelper.WriteLine($"Company updated in context: {JsonConvert.SerializeObject(result)}");
         }
 
+        //TODO: Make async operations work in mock
         [Trait("Company", "Context")]
         [Fact]
-        public void UpdateCompany_GivenNonExistingCompany_DoesNotExecuteContextMethods_UsingContext()
+        public async void UpdateCompany_GivenNonExistingCompany_DoesNotExecuteContextMethods_UsingContext()
         {
             //Arrange
             var companyDTO = new CompanyDTO()
             {
-                CompanyId = 10,
+                Id = 10,
                 Name = "Matel"
             };
 
-            var companiesMockSet = DbSetMockUtility.GetQueryableMock(new Company { CompanyId = 1, Name = "Mattel" });
+            var companiesMockSet = DbSetMockUtility.GetQueryableMock(new List<Company> { new Company { Id = 1, Name = "Mattel" } });
 
             var mockContext = new Mock<ToysAndGamesContext>();
             mockContext.Setup(m => m.Companies).Returns(companiesMockSet.Object);
 
-            CompanyService companyService = new CompanyService(mockContext.Object);
+            var mapperMock = new Mock<IMapper>();
+
+            CompanyService companyService = new (mockContext.Object,mapperMock.Object);
 
             //Act
-            companyService.UpdateCompany(companyDTO.CompanyId, companyDTO);
-            var result = mockContext.Object.Companies.FirstOrDefault(c => c.CompanyId == companyDTO.CompanyId);
+            await companyService.UpdateCompany(companyDTO.Id, companyDTO);
+            var result = mockContext.Object.Companies.FirstOrDefault(c => c.Id == companyDTO.Id);
 
             //Assert
             companiesMockSet.Verify(c => c.Update(It.IsAny<Company>()), Times.Never);
@@ -179,7 +187,7 @@ namespace WebApiTests
 
         [Trait("Company", "Context")]
         [Fact]
-        public void AddCompany_GivenCompanyDTO_ReturnsIntId_UsingContext()
+        public async void AddCompany_GivenCompanyDTO_AddsCompanyToDB_UsingContext()
         {
             //Arrange
             var companyDTO = new CompanyDTO()
@@ -190,25 +198,26 @@ namespace WebApiTests
             var companiesMockSet = new Mock<DbSet<Company>>();
 
             var mockContext = new Mock<ToysAndGamesContext>();
+
+            var mapperMock = new Mock<IMapper>();
            
             mockContext.Setup(m => m.Companies).Returns(companiesMockSet.Object);
 
-            CompanyService companyService = new CompanyService(mockContext.Object);
+            CompanyService companyService = new (mockContext.Object,mapperMock.Object);
 
             //Act
-            var result = companyService.AddCompany(companyDTO);
+            await companyService.AddCompany(companyDTO);
 
             //Assert
-            Assert.IsType<int>(result);
-            companiesMockSet.Verify(c => c.Add(It.IsAny<Company>()), Times.Once);
-            mockContext.Verify(c => c.SaveChanges(), Times.Once);
+            companiesMockSet.Verify(c => c.AddAsync(It.IsAny<Company>(),CancellationToken.None), Times.Once);
+            mockContext.Verify(c => c.SaveChangesAsync(CancellationToken.None), Times.Once);
 
-            _outputHelper.WriteLine($"CompanyId added: {result}");
+            _outputHelper.WriteLine("Methods Add and Savechanges executed once");
         }
 
         [Trait("Company", "Context")]
         [Fact]
-        public void AddCompany_GivenNullObject_ReturnsIdMinus1_UsingContext()
+        public async void AddCompany_GivenNullObject_ThrowsException_UsingContext()
         {
             //Arrange
             CompanyDTO companyDTO = null;
@@ -216,38 +225,44 @@ namespace WebApiTests
 
             var mockContext = new Mock<ToysAndGamesContext>();
 
+            var mapperMock = new Mock<IMapper>();
+
             mockContext.Setup(m => m.Companies).Returns(companiesMockSet.Object);
 
-            CompanyService companyService = new CompanyService(mockContext.Object);
+            CompanyService companyService = new (mockContext.Object,mapperMock.Object);
 
             //Act
-            var result = companyService.AddCompany(companyDTO);
+            var result = Assert.ThrowsAsync<OperationCanceledException>(() => companyService.AddCompany(companyDTO));
 
             //Assert
-            Assert.Equal(-1,result);
+            Assert.NotNull(result);
             companiesMockSet.Verify(c => c.Add(It.IsAny<Company>()), Times.Never);
             mockContext.Verify(c => c.SaveChanges(), Times.Never);
 
-            _outputHelper.WriteLine($"CompanyId added: {result}");
+            _outputHelper.WriteLine("");
         }
 
+        //TODO: Make async operations work in mock
         [Trait("Company", "Context")]
         [Fact]
-        public void DeleteCompany_RemovesCompany_UsingContext()
+        public async void DeleteCompany_RemovesCompany_UsingContext()
         {
             //Arrange
             var companyId = 1;
 
-            var companiesMockSet = DbSetMockUtility.GetQueryableMock(new Company { CompanyId = 1, Name = "Mattel" },
-                new Company { CompanyId = 2, Name = "Hasbro" });
+            var companiesMockSet = DbSetMockUtility.GetQueryableMock(new List<Company> { new Company { Id = 1, Name = "Mattel" },
+                new Company { Id = 2, Name = "Hasbro" } });
 
             var mockContext = new Mock<ToysAndGamesContext>();
+
+            var mapperMock = new Mock<IMapper>();
+
             mockContext.Setup(m => m.Companies).Returns(companiesMockSet.Object);
 
-            CompanyService companyService = new CompanyService(mockContext.Object);
+            CompanyService companyService = new (mockContext.Object,mapperMock.Object);
 
             //Act
-            companyService.DeleteCompany(companyId);
+            await companyService.DeleteCompany(companyId);
 
             //Assert
             companiesMockSet.Verify(c => c.Remove(It.IsAny<Company>()), Times.Once);
@@ -256,23 +271,28 @@ namespace WebApiTests
             _outputHelper.WriteLine($"CompanyId deleted: {companyId}");
         }
 
+        //TODO: Make async operations work in mock
         [Trait("Company", "Context")]
         [Fact]
-        public void DeleteCompany_GivenNoExistingCompany_DoesNotExecuteContextMethods_UsingContext()
+        public async void DeleteCompany_GivenNoExistingCompany_DoesNotExecuteContextMethods_UsingContext()
         {
             //Arrange
             var companyId = 10;
 
-            var companiesMockSet = DbSetMockUtility.GetQueryableMock(new Company { CompanyId = 1, Name = "Mattel" },
-                new Company { CompanyId = 2, Name = "Hasbro" });
+            var companiesMockSet = DbSetMockUtility.GetQueryableMock( new List<Company> {new Company { Id = 1, Name = "Mattel" },
+                new Company { Id = 2, Name = "Hasbro" } });
+            
 
             var mockContext = new Mock<ToysAndGamesContext>();
+
+            var mapperMock = new Mock<IMapper>();
+
             mockContext.Setup(m => m.Companies).Returns(companiesMockSet.Object);
 
-            CompanyService companyService = new CompanyService(mockContext.Object);
+            CompanyService companyService = new (mockContext.Object,mapperMock.Object);
 
             //Act
-            companyService.DeleteCompany(companyId);
+            await companyService.DeleteCompany(companyId);
 
             //Assert
             companiesMockSet.Verify(c => c.Remove(It.IsAny<Company>()), Times.Never);
