@@ -1,6 +1,7 @@
 ﻿
 using AutoMapper;
 using Microsoft.EntityFrameworkCore;
+using MockQueryable.Moq;
 using System.Data.Entity.Infrastructure;
 using ToysAndGames.DataAccess;
 using ToysAndGames.Models;
@@ -130,7 +131,9 @@ namespace WebApiTests
                 Name = "Matel"
             };
 
-            var companiesMockSet = DbSetMockUtility.GetQueryableMock(new List<Company> { new Company { Id = 1, Name = "Mattel" } });
+            var companies = new List<Company> { new Company { Id = 1, Name = "Mattel" } };
+
+            var companiesMockSet = companies.AsQueryable().BuildMockDbSet();
 
             var mockContext = new Mock<ToysAndGamesContext>();
             mockContext.Setup(m => m.Companies).Returns(companiesMockSet.Object);
@@ -148,7 +151,7 @@ namespace WebApiTests
             //Assert
             Assert.Equal(companyDTO.Name, result.Name);
             companiesMockSet.Verify(c => c.Update(It.IsAny<Company>()), Times.Once);
-            mockContext.Verify(c => c.SaveChanges(), Times.Once);
+            mockContext.Verify(c => c.SaveChangesAsync(CancellationToken.None), Times.Once);
             _outputHelper.WriteLine($"CompanyDTO with updated fields: {JsonConvert.SerializeObject(companyDTO)}");
             _outputHelper.WriteLine($"Company updated in context: {JsonConvert.SerializeObject(result)}");
         }
@@ -165,7 +168,9 @@ namespace WebApiTests
                 Name = "Matel"
             };
 
-            var companiesMockSet = DbSetMockUtility.GetQueryableMock(new List<Company> { new Company { Id = 1, Name = "Mattel" } });
+            var companies = new List<Company> { new Company { Id = 1, Name = "Mattel" } };
+
+            var companiesMockSet = companies.AsQueryable().BuildMockDbSet();
 
             var mockContext = new Mock<ToysAndGamesContext>();
             mockContext.Setup(m => m.Companies).Returns(companiesMockSet.Object);
@@ -180,7 +185,7 @@ namespace WebApiTests
 
             //Assert
             companiesMockSet.Verify(c => c.Update(It.IsAny<Company>()), Times.Never);
-            mockContext.Verify(c => c.SaveChanges(), Times.Never);
+            mockContext.Verify(c => c.SaveChangesAsync(CancellationToken.None), Times.Never);
             _outputHelper.WriteLine($"CompanyDTO with updated fields: {JsonConvert.SerializeObject(companyDTO)}");
             _outputHelper.WriteLine($"Company updated: {JsonConvert.SerializeObject(result)}");
         }
@@ -217,7 +222,7 @@ namespace WebApiTests
 
         [Trait("Company", "Context")]
         [Fact]
-        public async void AddCompany_GivenNullObject_ThrowsException_UsingContext()
+        public async void AddCompany_GivenNullObject_DoesNotExecuteContextMethods_UsingContext()
         {
             //Arrange
             CompanyDTO companyDTO = null;
@@ -232,14 +237,13 @@ namespace WebApiTests
             CompanyService companyService = new (mockContext.Object,mapperMock.Object);
 
             //Act
-            var result = Assert.ThrowsAsync<OperationCanceledException>(() => companyService.AddCompany(companyDTO));
+            await companyService.AddCompany(companyDTO);
 
             //Assert
-            Assert.NotNull(result);
-            companiesMockSet.Verify(c => c.Add(It.IsAny<Company>()), Times.Never);
-            mockContext.Verify(c => c.SaveChanges(), Times.Never);
+            companiesMockSet.Verify(c => c.AddAsync(It.IsAny<Company>(),CancellationToken.None), Times.Never);
+            mockContext.Verify(c => c.SaveChangesAsync(CancellationToken.None), Times.Never);
 
-            _outputHelper.WriteLine("");
+            _outputHelper.WriteLine("Db methods didn't got executed");
         }
 
         //TODO: Make async operations work in mock
@@ -250,8 +254,11 @@ namespace WebApiTests
             //Arrange
             var companyId = 1;
 
-            var companiesMockSet = DbSetMockUtility.GetQueryableMock(new List<Company> { new Company { Id = 1, Name = "Mattel" },
-                new Company { Id = 2, Name = "Hasbro" } });
+            var companies = new List<Company> { new Company { Id = 1, Name = "Mattel" },
+                new Company { Id = 2, Name = "Hasbro" } };
+
+
+            var companiesMockSet = companies.AsQueryable().BuildMockDbSet();
 
             var mockContext = new Mock<ToysAndGamesContext>();
 
@@ -266,7 +273,7 @@ namespace WebApiTests
 
             //Assert
             companiesMockSet.Verify(c => c.Remove(It.IsAny<Company>()), Times.Once);
-            mockContext.Verify(c => c.SaveChanges(), Times.Once);
+            mockContext.Verify(c => c.SaveChangesAsync(CancellationToken.None), Times.Once);
 
             _outputHelper.WriteLine($"CompanyId deleted: {companyId}");
         }
@@ -279,14 +286,16 @@ namespace WebApiTests
             //Arrange
             var companyId = 10;
 
-            var companiesMockSet = DbSetMockUtility.GetQueryableMock( new List<Company> {new Company { Id = 1, Name = "Mattel" },
-                new Company { Id = 2, Name = "Hasbro" } });
-            
+            var companies = new List<Company> {new Company { Id = 1, Name = "Mattel" },
+                new Company { Id = 2, Name = "Hasbro" } };
+
+            var companiesMockSet = companies.AsQueryable().BuildMockDbSet();                      
 
             var mockContext = new Mock<ToysAndGamesContext>();
 
             var mapperMock = new Mock<IMapper>();
 
+            //mockContext.Setup(m => m.Companies).Returns(companiesMockSet.Object);
             mockContext.Setup(m => m.Companies).Returns(companiesMockSet.Object);
 
             CompanyService companyService = new (mockContext.Object,mapperMock.Object);
@@ -296,7 +305,7 @@ namespace WebApiTests
 
             //Assert
             companiesMockSet.Verify(c => c.Remove(It.IsAny<Company>()), Times.Never);
-            mockContext.Verify(c => c.SaveChanges(), Times.Never);
+            mockContext.Verify(c => c.SaveChangesAsync(CancellationToken.None), Times.Never);
 
             _outputHelper.WriteLine($"Attempted deletion of CompanyId: {companyId}");
         }

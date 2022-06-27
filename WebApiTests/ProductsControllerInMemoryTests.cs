@@ -36,16 +36,15 @@ namespace WebApiTests
 
             //Act
             var productsBeforeAddResponse = await _client.GetAsync("/api/Products");
-            var productAddResponse = await _client.PostAsync("/api/Products/Product", httpContent);
+            await _client.PostAsync("/api/Products/Product", httpContent);
             var productsAfterAddResponse = await _client.GetAsync("/api/Products");
-            //var getAddedProduct = productAddResponse.Headers.Location;
+
             var productsAfterAdd = JsonConvert.DeserializeObject<List<ProductDTO>>(productsAfterAddResponse.Content.ReadAsStringAsync().Result);
             var getProductAddedResponse = await _client.GetAsync($"/api/Products/Product/{productsAfterAdd.Last().Id}");
 
             //Assert
             var productsBeforeAdd = JsonConvert.DeserializeObject<List<ProductDTO>>(productsBeforeAddResponse.Content.ReadAsStringAsync().Result);
             var productGet = JsonConvert.DeserializeObject<ProductDTO>(getProductAddedResponse.Content.ReadAsStringAsync().Result);
-            //var productsAfterAdd = JsonConvert.DeserializeObject<List<ProductDTO>>(productsAfterAddResponse.Content.ReadAsStringAsync().Result);
 
             Assert.NotEqual(productsBeforeAdd.Count,productsAfterAdd.Count);
             Assert.NotNull(productGet);

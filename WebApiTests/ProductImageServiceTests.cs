@@ -33,6 +33,7 @@ namespace WebApiTests
 
             //Assert
             Assert.NotEmpty(result);
+            _outputHelper.WriteLine(JsonConvert.SerializeObject(result));
         }
 
         [Trait("ProductImage", "Interface")]
@@ -52,6 +53,7 @@ namespace WebApiTests
 
             //Assert
             Assert.Empty(result);
+            _outputHelper.WriteLine(JsonConvert.SerializeObject(result));
         }
     }
 }
